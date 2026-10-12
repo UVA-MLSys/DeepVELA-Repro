@@ -1,0 +1,373 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "telemetry.schema.json",
+  "title": "Telemetry schema module",
+  "$comment": "Each $defs entry preserves one complete schema from the original expanded package.",
+  "$defs": {
+    "tool_call": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "tool-call.schema.json",
+      "title": "Tool call event",
+      "type": "object",
+      "required": [
+        "event_id",
+        "event_type",
+        "stage",
+        "tool_name",
+        "started_at",
+        "ended_at",
+        "outcome",
+        "instrumentation"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "event_type": {
+          "const": "tool_call"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "tool_name": {
+          "type": "string"
+        },
+        "action_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "obligation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attempt_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "runtime_session_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "started_at": {
+          "type": "string"
+        },
+        "ended_at": {
+          "type": "string"
+        },
+        "duration_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "outcome": {
+          "enum": [
+            "success",
+            "failure",
+            "cancelled",
+            "blocked"
+          ]
+        },
+        "error_class": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retry_of": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "instrumentation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "stage_span": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "stage-span.schema.json",
+      "title": "Stage span",
+      "type": "object",
+      "required": [
+        "event_id",
+        "event_type",
+        "stage",
+        "classification",
+        "started_at",
+        "ended_at",
+        "instrumentation"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "event_type": {
+          "const": "stage_span"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "classification": {
+          "enum": [
+            "agent_active",
+            "benchmark_execution",
+            "scheduler_wait",
+            "service_wait",
+            "human_blocked",
+            "instrumentation"
+          ]
+        },
+        "started_at": {
+          "type": "string"
+        },
+        "ended_at": {
+          "type": "string"
+        },
+        "duration_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "runtime_session_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attempt_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrumentation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "human_intervention": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "human-intervention.schema.json",
+      "title": "Human intervention",
+      "type": "object",
+      "required": [
+        "event_id",
+        "event_type",
+        "category",
+        "started_at",
+        "ended_at",
+        "blocking",
+        "decision",
+        "instrumentation"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "event_type": {
+          "const": "human_intervention"
+        },
+        "category": {
+          "enum": [
+            "scope",
+            "permission",
+            "resource",
+            "scientific_decision",
+            "discrepancy_adjudication",
+            "closure"
+          ]
+        },
+        "started_at": {
+          "type": "string"
+        },
+        "ended_at": {
+          "type": "string"
+        },
+        "blocking": {
+          "type": "boolean"
+        },
+        "decision": {
+          "type": "string"
+        },
+        "obligation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "instrumentation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "resource_sample": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "resource-sample.schema.json",
+      "title": "Resource sample",
+      "type": "object",
+      "required": [
+        "event_id",
+        "event_type",
+        "timestamp",
+        "runtime_session_id",
+        "hardware_environment_id",
+        "observations",
+        "instrumentation"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "event_type": {
+          "const": "resource_sample"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "runtime_session_id": {
+          "type": "string"
+        },
+        "hardware_environment_id": {
+          "type": "string"
+        },
+        "attempt_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "integer",
+              "string",
+              "null"
+            ]
+          }
+        },
+        "instrumentation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "telemetry_summary": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "telemetry-summary.schema.json",
+      "title": "Telemetry summary",
+      "type": "object",
+      "required": [
+        "summary_id",
+        "included_events",
+        "excluded_instrumentation_events",
+        "tool_calls",
+        "failures",
+        "retries",
+        "human_interventions",
+        "timing_seconds",
+        "unavailable_metrics"
+      ],
+      "properties": {
+        "summary_id": {
+          "type": "string"
+        },
+        "included_events": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "excluded_instrumentation_events": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tool_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failures": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "human_interventions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "input_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "timing_seconds": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "resource_summary": {
+          "type": "object"
+        },
+        "by_stage": {
+          "type": "object"
+        },
+        "unavailable_metrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/tool_call"
+    },
+    {
+      "$ref": "#/$defs/stage_span"
+    },
+    {
+      "$ref": "#/$defs/human_intervention"
+    },
+    {
+      "$ref": "#/$defs/resource_sample"
+    },
+    {
+      "$ref": "#/$defs/telemetry_summary"
+    }
+  ]
+}

@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "execution.schema.json",
+  "title": "Execution schema module",
+  "$comment": "Each $defs entry preserves one complete schema from the original expanded package.",
+  "$defs": {
+    "action_plan": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "action-plan.schema.json",
+      "title": "Action plan",
+      "type": "object",
+      "required": [
+        "action_plan_id",
+        "campaign_id",
+        "actions"
+      ],
+      "properties": {
+        "action_plan_id": {
+          "type": "string"
+        },
+        "campaign_id": {
+          "type": "string"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "action_id",
+              "binding_ids",
+              "obligation_ids",
+              "expected_artifacts",
+              "retry_limit"
+            ],
+            "properties": {
+              "action_id": {
+                "type": "string"
+              },
+              "binding_ids": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "obligation_ids": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "target_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "consumes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "expected_artifacts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "effects": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "retry_limit": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "resource_estimate": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "attempt_manifest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "attempt-manifest.schema.json",
+      "title": "Attempt manifest",
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "action_plan_id",
+        "action_id",
+        "obligation_ids",
+        "input_digests",
+        "effective_configuration",
+        "runtime_session_id",
+        "hardware_environment_id",
+        "status",
+        "created_at"
+      ],
+      "properties": {
+        "attempt_id": {
+          "type": "string"
+        },
+        "action_plan_id": {
+          "type": "string"
+        },
+        "action_id": {
+          "type": "string"
+        },
+        "obligation_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "target_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "input_digests": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "effective_configuration": {
+          "type": "object"
+        },
+        "runtime_session_id": {
+          "type": "string"
+        },
+        "hardware_environment_id": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "registered",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "blocked"
+          ]
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "started_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ended_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "runtime_session": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "runtime-session.schema.json",
+      "title": "Runtime session",
+      "type": "object",
+      "required": [
+        "runtime_session_id",
+        "role",
+        "access_method",
+        "lifecycle",
+        "started_at"
+      ],
+      "properties": {
+        "runtime_session_id": {
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "control",
+            "benchmark",
+            "evaluator"
+          ]
+        },
+        "access_method": {
+          "type": "string"
+        },
+        "lifecycle": {
+          "enum": [
+            "active",
+            "ended",
+            "replaced",
+            "unreachable"
+          ]
+        },
+        "declared_capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "started_at": {
+          "type": "string"
+        },
+        "ended_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "replaces_runtime_session_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "hardware_environment": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "hardware-environment.schema.json",
+      "title": "Hardware and software environment",
+      "type": "object",
+      "required": [
+        "hardware_environment_id",
+        "runtime_session_id",
+        "captured_at",
+        "observations"
+      ],
+      "properties": {
+        "hardware_environment_id": {
+          "type": "string"
+        },
+        "runtime_session_id": {
+          "type": "string"
+        },
+        "captured_at": {
+          "type": "string"
+        },
+        "observations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "value",
+              "evidence_class"
+            ],
+            "properties": {
+              "value": {},
+              "evidence_class": {
+                "enum": [
+                  "requested",
+                  "allocated",
+                  "observed",
+                  "inferred",
+                  "unavailable"
+                ]
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "artifact_record": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "artifact-record.schema.json",
+      "title": "Artifact record",
+      "type": "object",
+      "required": [
+        "artifact_id",
+        "role",
+        "producer_attempt_id",
+        "path",
+        "sha256",
+        "dependencies",
+        "read_back",
+        "status"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "producer_attempt_id": {
+          "type": "string"
+        },
+        "target_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "read_back": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "current",
+            "stale",
+            "missing",
+            "unreadable"
+          ]
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/action_plan"
+    },
+    {
+      "$ref": "#/$defs/attempt_manifest"
+    },
+    {
+      "$ref": "#/$defs/runtime_session"
+    },
+    {
+      "$ref": "#/$defs/hardware_environment"
+    },
+    {
+      "$ref": "#/$defs/artifact_record"
+    }
+  ]
+}

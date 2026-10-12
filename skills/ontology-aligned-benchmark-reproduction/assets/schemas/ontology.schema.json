@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ontology.schema.json",
+  "title": "Ontology schema module",
+  "$comment": "Each $defs entry preserves one complete schema from the original expanded package.",
+  "$defs": {
+    "ontology_element": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "ontology-element.schema.json",
+      "title": "Ontology element",
+      "type": "object",
+      "required": [
+        "element_id",
+        "category",
+        "identity",
+        "authority_type",
+        "source_ids",
+        "status"
+      ],
+      "properties": {
+        "element_id": {
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "software_environment",
+            "problem_specification",
+            "dataset",
+            "performance_metrics",
+            "reference_solution",
+            "documentation"
+          ]
+        },
+        "identity": {
+          "type": "string"
+        },
+        "authority_type": {
+          "enum": [
+            "human_decision",
+            "authoritative_source_fact",
+            "evidence_derived_fact",
+            "unresolved"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fields": {
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "resolved",
+            "unresolved",
+            "conflicted"
+          ]
+        }
+      }
+    },
+    "workload_obligation": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "workload-obligation.schema.json",
+      "title": "Workload obligation",
+      "type": "object",
+      "required": [
+        "obligation_id",
+        "predicate",
+        "severity",
+        "source_ids",
+        "target_ids",
+        "required_evidence_roles",
+        "status"
+      ],
+      "properties": {
+        "obligation_id": {
+          "type": "string"
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "required",
+            "advisory"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "target_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_evidence_roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "active",
+            "verified",
+            "failed",
+            "unresolved",
+            "stale"
+          ]
+        }
+      }
+    },
+    "implementation_binding": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "implementation-binding.schema.json",
+      "title": "Implementation binding",
+      "type": "object",
+      "required": [
+        "binding_id",
+        "obligation_ids",
+        "binding_type",
+        "identity",
+        "source_ids"
+      ],
+      "properties": {
+        "binding_id": {
+          "type": "string"
+        },
+        "obligation_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "binding_type": {
+          "enum": [
+            "code",
+            "configuration",
+            "transformation",
+            "environment",
+            "command",
+            "evaluator"
+          ]
+        },
+        "identity": {
+          "type": "string"
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "effective_configuration": {
+          "type": "object"
+        },
+        "permitted_transformations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ontology_element"
+    },
+    {
+      "$ref": "#/$defs/workload_obligation"
+    },
+    {
+      "$ref": "#/$defs/implementation_binding"
+    }
+  ]
+}

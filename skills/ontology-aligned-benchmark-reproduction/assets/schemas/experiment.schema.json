@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "experiment.schema.json",
+  "title": "Experiment schema module",
+  "$comment": "Each $defs entry preserves one complete schema from the original expanded package.",
+  "$defs": {
+    "experiment_condition": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "experiment-condition.schema.json",
+      "title": "Experiment condition",
+      "type": "object",
+      "required": [
+        "condition_id",
+        "trial_id",
+        "controller_realization",
+        "benchmark_readiness_condition",
+        "withheld_ontology_elements",
+        "agent_configuration",
+        "source_access",
+        "tool_access",
+        "budgets",
+        "intervention_policy"
+      ],
+      "properties": {
+        "condition_id": {
+          "type": "string"
+        },
+        "trial_id": {
+          "type": "string"
+        },
+        "controller_realization": {
+          "enum": [
+            "ordinary_prompt",
+            "procedural_skill",
+            "external_harness",
+            "graph_orchestrated",
+            "other"
+          ]
+        },
+        "benchmark_readiness_condition": {
+          "type": "string"
+        },
+        "withheld_ontology_elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "agent_configuration": {
+          "type": "object"
+        },
+        "source_access": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tool_access": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hardware_environment_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "budgets": {
+          "type": "object"
+        },
+        "intervention_policy": {
+          "type": "object"
+        }
+      }
+    },
+    "trial_summary": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "trial-summary.schema.json",
+      "title": "Trial summary",
+      "type": "object",
+      "required": [
+        "trial_id",
+        "condition_id",
+        "campaign_id",
+        "disposition_counts",
+        "reproduction_quality",
+        "evidence_coverage",
+        "tool_calls",
+        "retries",
+        "errors",
+        "human_interventions",
+        "timing_seconds",
+        "invalidation_outcomes"
+      ],
+      "properties": {
+        "trial_id": {
+          "type": "string"
+        },
+        "condition_id": {
+          "type": "string"
+        },
+        "campaign_id": {
+          "type": "string"
+        },
+        "disposition_counts": {
+          "type": "object"
+        },
+        "reproduction_quality": {
+          "type": "object"
+        },
+        "evidence_coverage": {
+          "type": "object"
+        },
+        "tool_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "input_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "errors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "human_interventions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timing_seconds": {
+          "type": "object"
+        },
+        "resource_use": {
+          "type": "object"
+        },
+        "invalidation_outcomes": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/experiment_condition"
+    },
+    {
+      "$ref": "#/$defs/trial_summary"
+    }
+  ]
+}

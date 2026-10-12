@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "verification.schema.json",
+  "title": "Verification schema module",
+  "$comment": "Each $defs entry preserves one complete schema from the original expanded package.",
+  "$defs": {
+    "check_record": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "check-record.schema.json",
+      "title": "Check record",
+      "type": "object",
+      "required": [
+        "check_id",
+        "procedure",
+        "artifact_ids",
+        "obligation_ids",
+        "result",
+        "verifier_identity",
+        "verifier_version",
+        "current"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string"
+        },
+        "procedure": {
+          "type": "string"
+        },
+        "artifact_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "obligation_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "target_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail",
+            "inconclusive",
+            "error"
+          ]
+        },
+        "verifier_identity": {
+          "type": "string"
+        },
+        "verifier_version": {
+          "type": "string"
+        },
+        "current": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      }
+    },
+    "comparison": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "comparison.schema.json",
+      "title": "Result comparison",
+      "type": "object",
+      "required": [
+        "comparison_id",
+        "target_id",
+        "actual_artifact_id",
+        "reference_artifact_id",
+        "comparator",
+        "grain",
+        "decision",
+        "current"
+      ],
+      "properties": {
+        "comparison_id": {
+          "type": "string"
+        },
+        "target_id": {
+          "type": "string"
+        },
+        "actual_artifact_id": {
+          "type": "string"
+        },
+        "reference_artifact_id": {
+          "type": "string"
+        },
+        "comparator": {
+          "enum": [
+            "exact",
+            "absolute_tolerance",
+            "relative_tolerance",
+            "policy_defined"
+          ]
+        },
+        "tolerance": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "grain": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "decision": {
+          "enum": [
+            "pass",
+            "fail",
+            "inconclusive"
+          ]
+        },
+        "current": {
+          "type": "boolean"
+        }
+      }
+    },
+    "discrepancy": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "discrepancy.schema.json",
+      "title": "Discrepancy",
+      "type": "object",
+      "required": [
+        "discrepancy_id",
+        "failure_layer",
+        "affected_ids",
+        "evidence_ids",
+        "severity",
+        "resolution_criteria",
+        "status"
+      ],
+      "properties": {
+        "discrepancy_id": {
+          "type": "string"
+        },
+        "failure_layer": {
+          "enum": [
+            "scope",
+            "source",
+            "ontology",
+            "binding",
+            "execution",
+            "artifact",
+            "verification",
+            "acceptance"
+          ]
+        },
+        "affected_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "major",
+            "minor"
+          ]
+        },
+        "resolution_criteria": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "resolved",
+            "accepted_exception",
+            "stale"
+          ]
+        },
+        "target_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "acceptance_decision": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "acceptance-decision.schema.json",
+      "title": "Acceptance decision",
+      "type": "object",
+      "required": [
+        "decision_id",
+        "target_id",
+        "required_obligation_ids",
+        "supporting_check_ids",
+        "supporting_comparison_ids",
+        "completed",
+        "valid",
+        "agreed",
+        "canonical",
+        "disposition",
+        "rationale",
+        "current"
+      ],
+      "properties": {
+        "decision_id": {
+          "type": "string"
+        },
+        "target_id": {
+          "type": "string"
+        },
+        "required_obligation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "supporting_check_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "supporting_comparison_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "completed": {
+          "type": "boolean"
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "agreed": {
+          "enum": [
+            true,
+            false,
+            "unavailable"
+          ]
+        },
+        "canonical": {
+          "type": "boolean"
+        },
+        "disposition": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "inconclusive",
+            "blocked"
+          ]
+        },
+        "rationale": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "current": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/check_record"
+    },
+    {
+      "$ref": "#/$defs/comparison"
+    },
+    {
+      "$ref": "#/$defs/discrepancy"
+    },
+    {
+      "$ref": "#/$defs/acceptance_decision"
+    }
+  ]
+}

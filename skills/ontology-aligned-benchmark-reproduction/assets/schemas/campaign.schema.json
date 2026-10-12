@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "campaign.schema.json",
+  "title": "Campaign schema module",
+  "$comment": "Each $defs entry preserves one complete schema from the original expanded package.",
+  "$defs": {
+    "campaign_contract": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "campaign-contract.schema.json",
+      "title": "Campaign contract",
+      "type": "object",
+      "required": [
+        "campaign_id",
+        "objective",
+        "claim_type",
+        "target_ids",
+        "permissions",
+        "stopping_condition",
+        "allowed_terminal_dispositions"
+      ],
+      "properties": {
+        "campaign_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_type": {
+          "enum": [
+            "documented_result_reproduction",
+            "conformance_only",
+            "negative_reproducibility_study"
+          ]
+        },
+        "target_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "budgets": {
+          "type": "object"
+        },
+        "retry_policy": {
+          "type": "object"
+        },
+        "human_decision_boundaries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_terminal_dispositions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "accepted",
+              "rejected",
+              "inconclusive",
+              "blocked"
+            ]
+          }
+        },
+        "stopping_condition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string"
+        }
+      }
+    },
+    "benchmark_assessment": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "benchmark-assessment.schema.json",
+      "title": "Benchmark readiness assessment",
+      "type": "object",
+      "required": [
+        "assessment_id",
+        "campaign_id",
+        "categories",
+        "status"
+      ],
+      "properties": {
+        "assessment_id": {
+          "type": "string"
+        },
+        "campaign_id": {
+          "type": "string"
+        },
+        "categories": {
+          "type": "array",
+          "minItems": 6,
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "score",
+              "citations",
+              "gaps"
+            ],
+            "properties": {
+              "name": {
+                "enum": [
+                  "software_environment",
+                  "problem_specification",
+                  "dataset",
+                  "performance_metrics",
+                  "reference_solution",
+                  "documentation"
+                ]
+              },
+              "score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "subcategories": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "citations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "gaps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "overall_score": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 5
+        },
+        "status": {
+          "enum": [
+            "placeholder",
+            "complete"
+          ]
+        }
+      }
+    },
+    "target_manifest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "target-manifest.schema.json",
+      "title": "Target manifest",
+      "type": "object",
+      "required": [
+        "campaign_id",
+        "targets"
+      ],
+      "properties": {
+        "campaign_id": {
+          "type": "string"
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "target_id",
+              "result_grain",
+              "reference_available",
+              "required_obligation_ids"
+            ],
+            "properties": {
+              "target_id": {
+                "type": "string"
+              },
+              "result_grain": {
+                "type": "string"
+              },
+              "reference_available": {
+                "type": "boolean"
+              },
+              "required_obligation_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "required_artifact_roles": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "verification_policy": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "verification-policy.schema.json",
+      "title": "Verification policy",
+      "type": "object",
+      "required": [
+        "policy_id",
+        "comparator",
+        "join_keys",
+        "result_grain",
+        "replicate_design",
+        "seed_policy",
+        "aggregation",
+        "uncertainty_procedure",
+        "missing_result_behavior",
+        "allowed_dispositions",
+        "frozen_at"
+      ],
+      "properties": {
+        "policy_id": {
+          "type": "string"
+        },
+        "comparator": {
+          "enum": [
+            "exact",
+            "absolute_tolerance",
+            "relative_tolerance",
+            "equivalence",
+            "confidence_interval",
+            "distributional",
+            "rank_preservation",
+            "custom"
+          ]
+        },
+        "join_keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "result_grain": {
+          "type": "string"
+        },
+        "replicate_design": {
+          "type": "object"
+        },
+        "seed_policy": {
+          "type": "object"
+        },
+        "aggregation": {
+          "type": "object"
+        },
+        "uncertainty_procedure": {
+          "type": "object"
+        },
+        "tolerance": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "missing_result_behavior": {
+          "enum": [
+            "fail",
+            "inconclusive"
+          ]
+        },
+        "allowed_dispositions": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "accepted",
+              "rejected",
+              "inconclusive",
+              "blocked"
+            ]
+          }
+        },
+        "frozen_at": {
+          "type": "string"
+        },
+        "amendments": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "campaign_state": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "campaign-state.schema.json",
+      "title": "Campaign state",
+      "type": "object",
+      "required": [
+        "campaign_id",
+        "phase",
+        "record_digests",
+        "counts",
+        "unresolved_decisions",
+        "invalidated_ids",
+        "next_action",
+        "updated_at"
+      ],
+      "properties": {
+        "campaign_id": {
+          "type": "string"
+        },
+        "phase": {
+          "enum": [
+            "scope",
+            "ontology",
+            "binding",
+            "execution",
+            "verification",
+            "recovery",
+            "closed"
+          ]
+        },
+        "record_digests": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "counts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "unresolved_decisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invalidated_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "next_action": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/campaign_contract"
+    },
+    {
+      "$ref": "#/$defs/benchmark_assessment"
+    },
+    {
+      "$ref": "#/$defs/target_manifest"
+    },
+    {
+      "$ref": "#/$defs/verification_policy"
+    },
+    {
+      "$ref": "#/$defs/campaign_state"
+    }
+  ]
+}

@@ -10,6 +10,11 @@ stale until regenerated and reverified. Preserve evidence outside the closure
 only when producer identity, input digests, effective parameters, governing
 obligations, verifier compatibility, and artifact integrity still match.
 
+Invalidations are typed by the changed and affected node classes. Keep an
+invalidation active until regenerated evidence has replacement identities and
+the record is explicitly resolved; a later successful attempt does not silently
+reactivate stale evidence.
+
 Retries create new attempt IDs. Do not patch a live attempt and resume its
 identity.
 

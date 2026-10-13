@@ -4,6 +4,54 @@
   "title": "Ontology schema module",
   "$comment": "Each $defs entry preserves one complete schema from the original expanded package.",
   "$defs": {
+    "source_record": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "source-record.schema.json",
+      "title": "Authoritative source record",
+      "type": "object",
+      "required": [
+        "source_id",
+        "title",
+        "authority_role",
+        "locator",
+        "immutable_identity",
+        "retrieved_at",
+        "status"
+      ],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "authority_role": {
+          "enum": [
+            "benchmark_specification",
+            "paper",
+            "repository",
+            "dataset",
+            "checkpoint",
+            "evaluator",
+            "official_results",
+            "documentation",
+            "human_decision"
+          ]
+        },
+        "locator": {"type": "string", "minLength": 1},
+        "immutable_identity": {
+          "type": "object",
+          "required": ["kind", "value"],
+          "properties": {
+            "kind": {
+              "enum": ["commit", "tag", "release", "revision", "digest", "doi", "version", "human_decision_id"]
+            },
+            "value": {"type": "string", "minLength": 1}
+          }
+        },
+        "retrieved_at": {"type": "string"},
+        "content_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$"},
+        "supports_element_ids": {"type": "array", "items": {"type": "string"}},
+        "supports_obligation_ids": {"type": "array", "items": {"type": "string"}},
+        "status": {"enum": ["resolved", "unresolved", "conflicted"]}
+      }
+    },
     "ontology_element": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "ontology-element.schema.json",
@@ -179,9 +227,40 @@
           }
         }
       }
+    },
+    "ontology_relation": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "ontology-relation.schema.json",
+      "title": "Typed ontology relation",
+      "type": "object",
+      "required": ["relation_id", "relation_type", "from_id", "from_type", "to_id", "to_type"],
+      "properties": {
+        "relation_id": {"type": "string"},
+        "relation_type": {
+          "enum": [
+            "supports",
+            "requires",
+            "depends_on",
+            "implemented_by",
+            "planned_by",
+            "consumes",
+            "produces",
+            "verifies",
+            "compares",
+            "supports_decision"
+          ]
+        },
+        "from_id": {"type": "string"},
+        "from_type": {"type": "string"},
+        "to_id": {"type": "string"},
+        "to_type": {"type": "string"}
+      }
     }
   },
   "oneOf": [
+    {
+      "$ref": "#/$defs/source_record"
+    },
     {
       "$ref": "#/$defs/ontology_element"
     },
@@ -190,6 +269,9 @@
     },
     {
       "$ref": "#/$defs/implementation_binding"
+    },
+    {
+      "$ref": "#/$defs/ontology_relation"
     }
   ]
 }

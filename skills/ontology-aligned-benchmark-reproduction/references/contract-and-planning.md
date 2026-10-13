@@ -29,6 +29,12 @@ aggregation, uncertainty procedure, tolerance or equivalence boundary,
 missing-result behavior, and allowed dispositions before viewing the complete
 result cohort. Human-selected tolerances must be identified as human decisions.
 
+Record the scientific rationale and authoritative reference sources for this
+policy. The agent may not tune a comparator after seeing reproduced values.
+Represent closure as executable predicates over target dispositions, graph
+validity, active discrepancies, invalidations, and obligation checks; retain a
+description, but do not use prose alone as the stopping gate.
+
 ## Action planning
 
 Each action declares its bindings, obligations, inputs, expected artifacts,

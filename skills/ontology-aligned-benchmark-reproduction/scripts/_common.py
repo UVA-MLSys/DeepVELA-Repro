@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Shared, dependency-free helpers for campaign control scripts."""
+"""Shared helpers for campaign control scripts."""
 
 from __future__ import annotations
 
@@ -10,6 +10,16 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
+
+
+SCHEMA_MODULES = {
+    "campaign": "campaign.schema.json",
+    "ontology": "ontology.schema.json",
+    "execution": "execution.schema.json",
+    "verification": "verification.schema.json",
+    "telemetry": "telemetry.schema.json",
+    "experiment": "experiment.schema.json",
+}
 
 
 def utc_now() -> str:
@@ -91,6 +101,33 @@ def sha256_file(path: Path) -> str:
 def canonical_digest(value: Any) -> str:
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def skill_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def validate_schema_record(value: Any, definition: str) -> list[str]:
+    """Return JSON Schema validation errors for a named bundled definition."""
+    try:
+        from jsonschema import Draft202012Validator
+    except ImportError as error:  # pragma: no cover - environment failure path
+        raise RuntimeError("jsonschema is required for campaign validation") from error
+    for module_name in SCHEMA_MODULES.values():
+        module = read_json(skill_root() / "assets" / "schemas" / module_name)
+        if definition not in module.get("$defs", {}):
+            continue
+        wrapper = {
+            "$schema": module.get("$schema", "https://json-schema.org/draft/2020-12/schema"),
+            "$ref": f"#/$defs/{definition}",
+            "$defs": module["$defs"],
+        }
+        validator = Draft202012Validator(wrapper)
+        return [
+            f"{'/'.join(str(part) for part in item.absolute_path) or '<root>'}: {item.message}"
+            for item in sorted(validator.iter_errors(value), key=lambda item: list(item.absolute_path))
+        ]
+    raise KeyError(f"unknown schema definition: {definition}")
 
 
 def require_campaign_root(path: str | Path) -> Path:

@@ -6,9 +6,51 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from _common import read_json, read_jsonl, require_campaign_root, utc_now, write_json_atomic
+from _common import invalidated_ids, read_json, read_jsonl, require_campaign_root, utc_now, write_json_atomic
 from decide_acceptance import compute_decisions, persist
 from validate_ontology_graph import validate
+
+
+def evaluate_stopping_condition(root: Path, contract: dict, decisions: list[dict], graph_report: dict) -> dict:
+    discrepancies = read_jsonl(root / "verification" / "discrepancies.jsonl")
+    current_evidence_ids = {
+        record.get("check_id") for record in read_jsonl(root / "verification" / "checks.jsonl") if record.get("current")
+    } | {
+        record.get("comparison_id") for record in read_jsonl(root / "verification" / "comparisons.jsonl") if record.get("current")
+    }
+    results = []
+    for predicate in contract["stopping_condition"]["predicates"]:
+        kind = predicate["predicate_type"]
+        parameters = predicate.get("parameters", {})
+        evidence_present = set(predicate.get("required_evidence_ids", [])).issubset(current_evidence_ids)
+        if kind == "all_targets_terminal":
+            allowed = set(parameters.get("allowed_dispositions", contract["allowed_terminal_dispositions"]))
+            satisfied = bool(decisions) and all(record["disposition"] in allowed for record in decisions)
+        elif kind == "ontology_graph_valid":
+            satisfied = bool(graph_report["valid"])
+        elif kind == "no_active_critical_discrepancies":
+            satisfied = not any(
+                record.get("status") == "open" and record.get("severity") == "critical" for record in discrepancies
+            )
+        elif kind == "no_active_invalidations":
+            satisfied = not invalidated_ids(root)
+        elif kind == "all_required_obligations_verified":
+            satisfied = bool(decisions) and all(record["valid"] for record in decisions)
+        elif kind == "custom":
+            satisfied = bool(parameters.get("human_confirmed", False)) and evidence_present
+        else:  # protected by schema validation
+            satisfied = False
+        results.append(
+            {
+                "predicate_id": predicate["predicate_id"],
+                "predicate_type": kind,
+                "satisfied": bool(satisfied and evidence_present),
+                "required_evidence_present": evidence_present,
+            }
+        )
+    mode = contract["stopping_condition"]["mode"]
+    proven = all(item["satisfied"] for item in results) if mode == "all" else any(item["satisfied"] for item in results)
+    return {"mode": mode, "proven": proven, "predicates": results}
 
 
 def close(root: Path) -> dict:
@@ -22,8 +64,10 @@ def close(root: Path) -> dict:
     invalid = [record for record in decisions if record["disposition"] not in allowed]
     if invalid:
         raise ValueError(f"targets have disallowed dispositions: {[record['target_id'] for record in invalid]}")
-    if any(record["disposition"] in {"blocked", "inconclusive"} for record in decisions):
-        raise ValueError("campaign has blocked or inconclusive targets and cannot satisfy strict closure")
+    stopping_proof = evaluate_stopping_condition(root, contract, decisions, report)
+    if not stopping_proof["proven"]:
+        failed = [item["predicate_id"] for item in stopping_proof["predicates"] if not item["satisfied"]]
+        raise ValueError(f"stopping condition is not proven: {failed}")
 
     counts: dict[str, int] = {}
     for decision in decisions:
@@ -36,6 +80,7 @@ def close(root: Path) -> dict:
         "disposition_counts": counts,
         "target_decisions": decisions,
         "ontology_validation": report,
+        "stopping_proof": stopping_proof,
         "closed_at": utc_now(),
     }
     write_json_atomic(root / "reports" / "result-report.json", result)

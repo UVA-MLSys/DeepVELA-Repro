@@ -15,7 +15,9 @@ specific answers or depending on a particular agent platform.
 3. Keep benchmark-readiness assessment separate from reproduction acceptance.
 4. Classify material facts as `human_decision`,
    `authoritative_source_fact`, `evidence_derived_fact`, or `unresolved`.
-5. Freeze the verification policy before inspecting the full result cohort.
+5. Freeze the verification policy before inspecting the full result cohort and
+   record why its comparator, grain, tolerance, replicate design, aggregation,
+   and uncertainty treatment are scientifically appropriate.
 6. Register an immutable attempt before consequential execution.
 7. Treat an artifact as evidence only after a declared check consumes it and
    verifies a named obligation.
@@ -24,6 +26,8 @@ specific answers or depending on a particular agent platform.
    artifacts.
 10. Close only when deterministic validation proves the declared stopping
     condition. An agent statement that work is complete is insufficient.
+11. Score benchmark readiness with the published MLCommons criteria; do not
+    infer acceptance from that score or award points without source evidence.
 
 Do not add benchmark profiles, expected scores, model lists, launch commands,
 or platform configuration to this package. Put them in the campaign workspace.
@@ -46,12 +50,14 @@ external effects are explicit.
 
 Read [ontology-model.md](references/ontology-model.md) and
 [source-grounding.md](references/source-grounding.md). Assess the benchmark
-under the six MLCommons-aligned categories, create ontology elements, and turn
+under the six MLCommons categories and their published criteria, create ontology elements, and turn
 authoritative requirements into testable workload obligations. Record missing
 or conflicting specification as gaps or discrepancies.
 
-Exit only when every target has an obligation set and every factual obligation
-is grounded in an authoritative source.
+Exit only when every target has an obligation set, every factual obligation is
+grounded in a resolved immutable source record, and the pre-result verification
+policy is frozen. Use `scripts/score_benchmark_readiness.py` to compute readiness
+from cited criterion evidence.
 
 ### 2. Bind obligations to implementation
 
@@ -81,15 +87,17 @@ Use the benchmark-owned evaluator or a separately frozen verifier. Apply the
 declared policy at the finest shared result grain. Record checks, comparisons,
 and discrepancies, including missing evidence.
 
-Exit only when every required obligation is passed, failed, or explicitly
-unresolved.
+Run `scripts/verify_artifact_integrity.py --apply` before acceptance. Exit only
+when every required obligation is passed, failed, or explicitly unresolved and
+every current artifact passes independent read-back and digest verification.
 
 ### 5. Recover or close
 
 Read [recovery-and-closure.md](references/recovery-and-closure.md). For a repair,
-compute the invalidation closure, retain only evidence proven compatible, and
-regenerate affected descendants. Otherwise run `decide_acceptance.py` and
-`close_campaign.py`.
+compute the typed invalidation closure, retain only evidence proven compatible,
+regenerate affected descendants, and explicitly resolve the invalidation with
+replacement identities. Otherwise run `decide_acceptance.py` and
+`close_campaign.py`; closure evaluates the structured stopping predicates.
 
 Close only when each target has an allowed terminal disposition and all claims
 are supported by current, readable evidence.

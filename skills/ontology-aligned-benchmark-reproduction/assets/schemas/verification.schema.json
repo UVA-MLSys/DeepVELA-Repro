@@ -288,6 +288,39 @@
           "type": "string"
         }
       }
+    },
+    "invalidation_record": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "invalidation-record.schema.json",
+      "title": "Typed invalidation record",
+      "type": "object",
+      "required": [
+        "invalidation_id",
+        "changed_ids",
+        "changed_types",
+        "invalidated_ids",
+        "invalidated_by_type",
+        "reason",
+        "status",
+        "applied",
+        "created_at"
+      ],
+      "properties": {
+        "invalidation_id": {"type": "string"},
+        "changed_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "changed_types": {"type": "object", "additionalProperties": {"type": "string"}},
+        "invalidated_ids": {"type": "array", "items": {"type": "string"}},
+        "invalidated_by_type": {
+          "type": "object",
+          "additionalProperties": {"type": "array", "items": {"type": "string"}}
+        },
+        "reason": {"type": "string", "minLength": 1},
+        "status": {"enum": ["active", "resolved"]},
+        "applied": {"type": "boolean"},
+        "replacement_ids": {"type": "array", "items": {"type": "string"}},
+        "resolved_at": {"type": ["string", "null"]},
+        "created_at": {"type": "string"}
+      }
     }
   },
   "oneOf": [
@@ -302,6 +335,9 @@
     },
     {
       "$ref": "#/$defs/acceptance_decision"
+    },
+    {
+      "$ref": "#/$defs/invalidation_record"
     }
   ]
 }

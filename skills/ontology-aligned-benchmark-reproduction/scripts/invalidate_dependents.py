@@ -20,13 +20,52 @@ COLLECTIONS = [
     ("decisions/acceptance-decisions.jsonl", "decision_id", "current", False),
 ]
 
+DEPENDENCY_RELATIONS = {
+    "depends_on",
+    "implemented_by",
+    "planned_by",
+    "consumes",
+    "produces",
+    "verifies",
+    "compares",
+    "supports_decision",
+}
+
+
+def record_types(root: Path) -> dict[str, str]:
+    result: dict[str, str] = {}
+    collections = [
+        ("sources/source-manifest.json", "sources", "source_id", "source"),
+        ("ontology/elements.jsonl", None, "element_id", "ontology_element"),
+        ("ontology/obligations.jsonl", None, "obligation_id", "obligation"),
+        ("ontology/bindings.jsonl", None, "binding_id", "binding"),
+        ("verification/artifacts.jsonl", None, "artifact_id", "artifact"),
+        ("verification/checks.jsonl", None, "check_id", "check"),
+        ("verification/comparisons.jsonl", None, "comparison_id", "comparison"),
+        ("decisions/acceptance-decisions.jsonl", None, "decision_id", "decision"),
+    ]
+    for relative, list_key, id_key, kind in collections:
+        path = root / relative
+        if list_key:
+            records = read_json(path).get(list_key, []) if path.exists() else []
+        else:
+            records = read_jsonl(path)
+        for record in records:
+            if record.get(id_key):
+                result[str(record[id_key])] = kind
+    plan_path = root / "planning" / "action-plan.json"
+    if plan_path.exists():
+        for action in read_json(plan_path).get("actions", []):
+            result[str(action["action_id"])] = "action"
+    return result
+
 
 def build_graph(root: Path) -> dict[str, set[str]]:
     graph: dict[str, set[str]] = defaultdict(set)
     for relation in read_jsonl(root / "ontology" / "relations.jsonl"):
         source = relation.get("source_id") or relation.get("from_id")
         target = relation.get("target_id") or relation.get("to_id")
-        if source and target:
+        if source and target and relation.get("relation_type") in DEPENDENCY_RELATIONS:
             graph[str(source)].add(str(target))
     for obligation in read_jsonl(root / "ontology" / "obligations.jsonl"):
         for dependency in obligation.get("depends_on", []):
@@ -88,14 +127,22 @@ def apply_stale_marks(root: Path, stale_ids: set[str]) -> dict[str, int]:
 
 def invalidate(root: Path, changed_ids: list[str], reason: str, apply: bool) -> dict[str, Any]:
     closure = descendants(build_graph(root), changed_ids)
+    types = record_types(root)
+    invalidated_by_type: dict[str, list[str]] = defaultdict(list)
+    for record_id in sorted(closure):
+        invalidated_by_type[types.get(record_id, "unknown")].append(record_id)
     counts = apply_stale_marks(root, closure) if apply else {}
     record = {
         "invalidation_id": f"invalidation:{uuid.uuid4()}",
         "changed_ids": changed_ids,
+        "changed_types": {record_id: types.get(record_id, "unknown") for record_id in changed_ids},
         "invalidated_ids": sorted(closure),
+        "invalidated_by_type": dict(sorted(invalidated_by_type.items())),
         "reason": reason,
         "status": "active",
         "applied": apply,
+        "replacement_ids": [],
+        "resolved_at": None,
         "changed_record_counts": counts,
         "created_at": utc_now(),
     }
@@ -104,12 +151,30 @@ def invalidate(root: Path, changed_ids: list[str], reason: str, apply: bool) -> 
     return record
 
 
+def resolve(root: Path, invalidation_id: str, replacement_ids: list[str]) -> dict[str, Any]:
+    path = root / "state" / "invalidations.jsonl"
+    records = read_jsonl(path)
+    matches = [record for record in records if record.get("invalidation_id") == invalidation_id]
+    if len(matches) != 1:
+        raise ValueError(f"expected exactly one invalidation {invalidation_id}")
+    record = matches[0]
+    if record.get("status") != "active":
+        raise ValueError(f"invalidation is not active: {invalidation_id}")
+    record["status"] = "resolved"
+    record["replacement_ids"] = replacement_ids
+    record["resolved_at"] = utc_now()
+    write_jsonl_atomic(path, records)
+    return record
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("campaign_root")
-    parser.add_argument("--changed-id", action="append", required=True)
-    parser.add_argument("--reason", required=True)
+    parser.add_argument("--changed-id", action="append")
+    parser.add_argument("--reason")
     parser.add_argument("--apply", action="store_true", help="mark records stale and persist the invalidation")
+    parser.add_argument("--resolve-invalidation-id")
+    parser.add_argument("--replacement-id", action="append", default=[])
     parser.add_argument("--output")
     return parser.parse_args()
 
@@ -118,14 +183,22 @@ def main() -> int:
     args = parse_args()
     try:
         root = require_campaign_root(args.campaign_root)
-        record = invalidate(root, args.changed_id, args.reason, args.apply)
+        if args.resolve_invalidation_id:
+            record = resolve(root, args.resolve_invalidation_id, args.replacement_id)
+        else:
+            if not args.changed_id or not args.reason:
+                raise ValueError("--changed-id and --reason are required when creating an invalidation")
+            record = invalidate(root, args.changed_id, args.reason, args.apply)
         if args.output:
             from _common import write_json_atomic
             write_json_atomic(Path(args.output), record)
     except (KeyError, OSError, ValueError) as error:
         print(f"error: {error}")
         return 2
-    print(f"invalidated={len(record['invalidated_ids'])} applied={str(args.apply).lower()}")
+    if args.resolve_invalidation_id:
+        print(f"resolved={record['invalidation_id']} replacements={len(record['replacement_ids'])}")
+    else:
+        print(f"invalidated={len(record['invalidated_ids'])} applied={str(args.apply).lower()}")
     return 0
 
 

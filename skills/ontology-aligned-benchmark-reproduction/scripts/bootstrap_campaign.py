@@ -9,14 +9,47 @@ from pathlib import Path
 from _common import utc_now, write_json_atomic
 
 
-CATEGORIES = [
-    "software_environment",
-    "problem_specification",
-    "dataset",
-    "performance_metrics",
-    "reference_solution",
-    "documentation",
-]
+MLCOMMONS_RUBRIC = {
+    "software_environment": [
+        ("baseline_code_available", 1),
+        ("code_complete", 1),
+        ("code_documented", 1),
+        ("runs_without_modification", 1),
+        ("environment_reproducibly_specified", 1),
+    ],
+    "problem_specification": [
+        ("system_constraints_specified", 1),
+        ("benchmark_task_clear", 1),
+        ("dataset_format_specified", 1),
+        ("task_inputs_specified", 1),
+        ("task_outputs_specified", 1),
+    ],
+    "dataset": [
+        ("findable", 1),
+        ("accessible", 1),
+        ("interoperable", 1),
+        ("reusable", 1),
+        ("canonical_splits_defined", 1),
+    ],
+    "performance_metrics": [
+        ("metric_definitions", 3),
+        ("metric_quality", 2),
+    ],
+    "reference_solution": [
+        ("publicly_available", 1),
+        ("well_documented", 1),
+        ("requirements_listed", 1),
+        ("all_metrics_evaluated", 1),
+        ("baseline_open_for_study", 1),
+    ],
+    "documentation": [
+        ("task_documented", 1),
+        ("background_explained", 1),
+        ("motivation_explained", 1),
+        ("evaluation_criteria_explained", 1),
+        ("academic_paper_exists", 1),
+    ],
+}
 
 DIRECTORIES = [
     "contract",
@@ -50,14 +83,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--target", action="append", required=True, dest="targets")
     parser.add_argument("--permission", action="append", default=[])
-    parser.add_argument("--stopping-condition", required=True)
+    parser.add_argument("--stopping-condition", required=True, help="human-readable description; executable predicates are generated separately")
     parser.add_argument(
         "--allowed-disposition",
         action="append",
         choices=["accepted", "rejected", "inconclusive", "blocked"],
         default=[],
     )
-    parser.add_argument("--comparator", choices=["exact", "absolute_tolerance", "relative_tolerance"], default="exact")
+    parser.add_argument("--comparator", choices=["exact", "absolute_tolerance", "relative_tolerance"], required=True)
+    parser.add_argument("--verification-rationale", required=True)
+    parser.add_argument("--reference-source-id", action="append", default=[])
     parser.add_argument("--tolerance", type=float)
     parser.add_argument("--join-key", action="append", default=["target_id"])
     parser.add_argument("--result-grain", default="target")
@@ -91,7 +126,44 @@ def bootstrap(args: argparse.Namespace) -> Path:
             "retry_policy": {},
             "human_decision_boundaries": [],
             "allowed_terminal_dispositions": dispositions,
-            "stopping_condition": args.stopping_condition,
+            "stopping_condition": {
+                "description": args.stopping_condition,
+                "mode": "all",
+                "predicates": [
+                    {
+                        "predicate_id": "stop:targets-terminal",
+                        "predicate_type": "all_targets_terminal",
+                        "parameters": {"allowed_dispositions": dispositions},
+                        "required_evidence_ids": [],
+                    },
+                    {
+                        "predicate_id": "stop:graph-valid",
+                        "predicate_type": "ontology_graph_valid",
+                        "parameters": {},
+                        "required_evidence_ids": [],
+                    },
+                    {
+                        "predicate_id": "stop:no-critical-discrepancies",
+                        "predicate_type": "no_active_critical_discrepancies",
+                        "parameters": {},
+                        "required_evidence_ids": [],
+                    },
+                    {
+                        "predicate_id": "stop:no-active-invalidations",
+                        "predicate_type": "no_active_invalidations",
+                        "parameters": {},
+                        "required_evidence_ids": [],
+                    },
+                    {
+                        "predicate_id": "stop:obligations-verified",
+                        "predicate_type": "all_required_obligations_verified",
+                        "parameters": {},
+                        "required_evidence_ids": [],
+                    },
+                ],
+                "frozen_at": now,
+                "amendments": [],
+            },
             "created_at": now,
         },
     )
@@ -117,11 +189,32 @@ def bootstrap(args: argparse.Namespace) -> Path:
             "assessment_id": f"assessment:{args.campaign_id}",
             "campaign_id": args.campaign_id,
             "categories": [
-                {"name": category, "score": 0, "subcategories": [], "citations": [], "gaps": ["not_assessed"]}
-                for category in CATEGORIES
+                {
+                    "name": category,
+                    "score": 0,
+                    "criteria": [
+                        {
+                            "criterion_id": criterion_id,
+                            "max_points": max_points,
+                            "awarded_points": 0,
+                            "met": False,
+                            "evidence_source_ids": [],
+                            "rationale": "not assessed",
+                        }
+                        for criterion_id, max_points in criteria
+                    ],
+                    "gaps": ["not_assessed"],
+                }
+                for category, criteria in MLCOMMONS_RUBRIC.items()
             ],
             "overall_score": 0,
             "status": "placeholder",
+            "rubric_identity": {
+                "title": "An MLCommons Scientific Benchmarks Ontology",
+                "version": "arXiv:2511.05614v1",
+                "source_locator": "https://arxiv.org/abs/2511.05614",
+            },
+            "assessor": {"identity": "unassigned", "independent_of_execution": False},
         },
     )
     write_json_atomic(
@@ -135,6 +228,9 @@ def bootstrap(args: argparse.Namespace) -> Path:
             "seed_policy": {},
             "aggregation": {},
             "uncertainty_procedure": {},
+            "selection_rationale": args.verification_rationale,
+            "selected_before_result_inspection": True,
+            "reference_source_ids": args.reference_source_id,
             "tolerance": args.tolerance,
             "missing_result_behavior": "fail",
             "allowed_dispositions": dispositions,

@@ -4,6 +4,11 @@ Prefer primary benchmark and model sources. Record source identity, revision,
 retrieval time, digest when possible, authority role, and the exact ontology
 elements or obligations supported.
 
+Every cited `source_id` must resolve to a record in `source-manifest.json` with
+a locator and immutable identity such as a commit, dataset revision, release,
+DOI, or digest. A mutable URL may remain as the locator, but it cannot replace
+the immutable identity. Mark unresolved or conflicting sources explicitly.
+
 ## Authority order
 
 Use benchmark-owned specifications, evaluator code, result publications,

@@ -100,6 +100,16 @@
           ],
           "minimum": 0
         },
+        "cached_input_tokens": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "reasoning_tokens": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "agent_session_id": {"type": ["string", "null"]},
+        "adapter": {"type": "string"},
         "instrumentation": {
           "type": "boolean"
         }
@@ -178,6 +188,10 @@
         "started_at",
         "ended_at",
         "blocking",
+        "human_decision_id",
+        "requested_by",
+        "reason",
+        "counts_toward_intervention_metric",
         "decision",
         "instrumentation"
       ],
@@ -204,9 +218,14 @@
         "ended_at": {
           "type": "string"
         },
+        "duration_seconds": {"type": "number", "minimum": 0},
         "blocking": {
           "type": "boolean"
         },
+        "human_decision_id": {"type": "string"},
+        "requested_by": {"type": "string"},
+        "reason": {"type": "string"},
+        "counts_toward_intervention_metric": {"type": "boolean"},
         "decision": {
           "type": "string"
         },
@@ -260,12 +279,13 @@
         "observations": {
           "type": "object",
           "additionalProperties": {
-            "type": [
-              "number",
-              "integer",
-              "string",
-              "null"
-            ]
+            "type": "object",
+            "required": ["value", "unit", "aggregation"],
+            "properties": {
+              "value": {"type": ["number", "integer", "string", "null"]},
+              "unit": {"type": "string"},
+              "aggregation": {"enum": ["max", "min", "last", "delta"]}
+            }
           }
         },
         "instrumentation": {
@@ -331,6 +351,8 @@
           ],
           "minimum": 0
         },
+        "cached_input_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "reasoning_tokens": {"type": ["integer", "null"], "minimum": 0},
         "timing_seconds": {
           "type": "object",
           "additionalProperties": {
@@ -338,9 +360,9 @@
             "minimum": 0
           }
         },
-        "resource_summary": {
-          "type": "object"
-        },
+        "resource_summary": {"type": "object"},
+        "human_interventions_by_category": {"type": "object"},
+        "blocking_human_seconds": {"type": "number", "minimum": 0},
         "by_stage": {
           "type": "object"
         },
@@ -350,6 +372,35 @@
             "type": "string"
           }
         }
+      }
+    },
+    "agent_usage": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "agent-usage.schema.json",
+      "title": "Agent model usage event",
+      "type": "object",
+      "required": [
+        "event_id",
+        "event_type",
+        "stage",
+        "recorded_at",
+        "adapter",
+        "instrumentation"
+      ],
+      "properties": {
+        "event_id": {"type": "string"},
+        "event_type": {"const": "agent_usage"},
+        "stage": {"type": "string"},
+        "recorded_at": {"type": "string"},
+        "agent_session_id": {"type": ["string", "null"]},
+        "model": {"type": ["string", "null"]},
+        "input_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "output_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "cached_input_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "reasoning_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "adapter": {"type": "string"},
+        "provider_event_id": {"type": ["string", "null"]},
+        "instrumentation": {"type": "boolean"}
       }
     }
   },
@@ -368,6 +419,9 @@
     },
     {
       "$ref": "#/$defs/telemetry_summary"
+    },
+    {
+      "$ref": "#/$defs/agent_usage"
     }
   ]
 }

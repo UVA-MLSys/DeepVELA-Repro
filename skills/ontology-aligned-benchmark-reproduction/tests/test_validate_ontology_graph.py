@@ -31,6 +31,7 @@ class GraphValidationTest(unittest.TestCase):
                 "target_manifest",
                 "verification_policy",
                 "campaign_state",
+                "human_decision_record",
                 "source_record",
                 "ontology_element",
                 "workload_obligation",
@@ -51,7 +52,10 @@ class GraphValidationTest(unittest.TestCase):
                 "human_intervention",
                 "resource_sample",
                 "telemetry_summary",
+                "agent_usage",
                 "experiment_condition",
+                "assessment_seal",
+                "condition_bundle_manifest",
                 "trial_summary",
             },
         )

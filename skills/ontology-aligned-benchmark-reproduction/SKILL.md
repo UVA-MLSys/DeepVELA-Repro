@@ -114,3 +114,8 @@ For profiling or controlled studies, read
 [telemetry-and-profiling.md](references/telemetry-and-profiling.md). Telemetry
 collection is instrumentation and is excluded from reproduction cost. Required
 scientific evidence and provenance recording remain part of that cost.
+Ingest controller traces with `scripts/ingest_agent_trace.py`, sample a remote
+benchmark runtime from inside that runtime with `sample_runtime_resources.py`,
+and materialize visible/withheld inputs with
+`materialize_experiment_condition.py`. For readiness experiments, use an
+independent assessor and seal the completed assessment before execution.

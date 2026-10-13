@@ -16,7 +16,7 @@ campaign/
   decisions/      acceptance and human decisions
   state/          campaign state and invalidations
   telemetry/      tool calls, spans, interventions, resource samples, summary
-  experiment/     experiment condition and trial summary
+  experiment/     sealed assessment, materialized conditions, and trial summary
   reports/        machine-readable and narrative results
 ```
 

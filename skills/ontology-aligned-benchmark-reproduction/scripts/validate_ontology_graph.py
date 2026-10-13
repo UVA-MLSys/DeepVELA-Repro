@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from _common import (
+    canonical_digest,
     find_json_records,
     index_unique,
     invalidated_ids,
@@ -134,6 +135,34 @@ def validate(root: Path, phase: str | None = None) -> dict[str, Any]:
         schema_issue(errors, f"runtimes:{hardware_id}", "hardware_environment", record)
     for invalidation in read_jsonl(root / "state" / "invalidations.jsonl"):
         schema_issue(errors, f"state/invalidations.jsonl:{invalidation.get('invalidation_id')}", "invalidation_record", invalidation)
+    for human_decision in read_jsonl(root / "decisions" / "human-decisions.jsonl"):
+        schema_issue(errors, f"decisions/human-decisions.jsonl:{human_decision.get('human_decision_id')}", "human_decision_record", human_decision)
+    telemetry_definitions = {
+        "tool_call": "tool_call",
+        "stage_span": "stage_span",
+        "human_intervention": "human_intervention",
+        "resource_sample": "resource_sample",
+        "agent_usage": "agent_usage",
+    }
+    for event in read_jsonl(root / "telemetry" / "events.jsonl"):
+        definition = telemetry_definitions.get(event.get("event_type"))
+        if definition:
+            schema_issue(errors, f"telemetry/events.jsonl:{event.get('event_id')}", definition, event)
+        else:
+            errors.append(issue("unknown_telemetry_event", "telemetry event has no registered schema", [str(event.get("event_id"))]))
+    summary_path = root / "telemetry" / "telemetry-summary.json"
+    if summary_path.exists():
+        schema_issue(errors, "telemetry/telemetry-summary.json", "telemetry_summary", read_json(summary_path))
+    seal_path = root / "experiment" / "benchmark-assessment-seal.json"
+    if seal_path.exists():
+        seal = read_json(seal_path)
+        schema_issue(errors, "experiment/benchmark-assessment-seal.json", "assessment_seal", seal)
+        if seal.get("assessment_sha256") != canonical_digest(assessment):
+            errors.append(issue("stale_assessment_seal", "assessment changed after independent review", [str(seal.get("seal_id"))]))
+    for condition_path in sorted((root / "experiment" / "conditions").glob("*/condition.json")) if (root / "experiment" / "conditions").exists() else []:
+        schema_issue(errors, str(condition_path.relative_to(root)), "experiment_condition", read_json(condition_path))
+    for manifest_path in sorted((root / "experiment" / "conditions").glob("*/bundle-manifest.json")) if (root / "experiment" / "conditions").exists() else []:
+        schema_issue(errors, str(manifest_path.relative_to(root)), "condition_bundle_manifest", read_json(manifest_path))
 
     if set(contract.get("target_ids", [])) != set(targets):
         errors.append(issue("target_scope_mismatch", "contract and target manifest target IDs differ"))

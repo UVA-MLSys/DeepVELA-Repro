@@ -450,6 +450,38 @@
           "type": "string"
         }
       }
+    },
+    "human_decision_record": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "human-decision-record.schema.json",
+      "title": "Canonical human decision and intervention record",
+      "type": "object",
+      "required": [
+        "human_decision_id",
+        "category",
+        "requested_by",
+        "reason",
+        "decision",
+        "blocking",
+        "counts_toward_intervention_metric",
+        "started_at",
+        "ended_at"
+      ],
+      "properties": {
+        "human_decision_id": {"type": "string"},
+        "category": {
+          "enum": ["scope", "permission", "resource", "scientific_decision", "discrepancy_adjudication", "closure"]
+        },
+        "requested_by": {"type": "string"},
+        "reason": {"type": "string"},
+        "decision": {"type": "string"},
+        "blocking": {"type": "boolean"},
+        "counts_toward_intervention_metric": {"type": "boolean"},
+        "obligation_ids": {"type": "array", "items": {"type": "string"}},
+        "started_at": {"type": "string"},
+        "ended_at": {"type": "string"},
+        "telemetry_event_id": {"type": "string"}
+      }
     }
   },
   "oneOf": [
@@ -467,6 +499,9 @@
     },
     {
       "$ref": "#/$defs/campaign_state"
+    },
+    {
+      "$ref": "#/$defs/human_decision_record"
     }
   ]
 }

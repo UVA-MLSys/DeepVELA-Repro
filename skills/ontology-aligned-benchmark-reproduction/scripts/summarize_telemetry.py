@@ -17,17 +17,22 @@ def summarize(events: list[dict[str, Any]]) -> dict[str, Any]:
     by_stage: dict[str, dict[str, float | int]] = defaultdict(lambda: {"events": 0, "tool_calls": 0, "failures": 0, "duration_seconds": 0.0})
     timing: dict[str, float] = defaultdict(float)
     tool_calls = failures = retries = interventions = 0
-    input_tokens = output_tokens = 0
-    saw_input_tokens = saw_output_tokens = False
-    resource_maxima: dict[str, float] = {}
+    token_totals = {"input_tokens": 0, "output_tokens": 0, "cached_input_tokens": 0, "reasoning_tokens": 0}
+    token_seen = {key: False for key in token_totals}
+    usage_events = [event for event in included if event.get("event_type") == "agent_usage"]
+    token_events = usage_events or [event for event in included if event.get("event_type") == "tool_call"]
+    intervention_categories: dict[str, int] = defaultdict(int)
+    blocking_human_seconds = 0.0
+    resource_values: dict[str, list[tuple[Any, str, str]]] = defaultdict(list)
 
     for event in included:
         stage = str(event.get("stage", "unassigned"))
         by_stage[stage]["events"] += 1
         duration = float(event.get("duration_seconds", 0.0) or 0.0)
-        by_stage[stage]["duration_seconds"] += duration
-        classification = str(event.get("classification", event.get("event_type", "other")))
-        timing[classification] += duration
+        if event.get("event_type") in {"tool_call", "stage_span"}:
+            by_stage[stage]["duration_seconds"] += duration
+        if event.get("event_type") == "stage_span":
+            timing[str(event["classification"])] += duration
         if event.get("event_type") == "tool_call":
             tool_calls += 1
             by_stage[stage]["tool_calls"] += 1
@@ -36,24 +41,49 @@ def summarize(events: list[dict[str, Any]]) -> dict[str, Any]:
                 by_stage[stage]["failures"] += 1
             if event.get("retry_of"):
                 retries += 1
-        if event.get("event_type") == "human_intervention":
+        if event.get("event_type") == "human_intervention" and event.get("counts_toward_intervention_metric", True):
             interventions += 1
-        if event.get("input_tokens") is not None:
-            saw_input_tokens = True
-            input_tokens += int(event["input_tokens"])
-        if event.get("output_tokens") is not None:
-            saw_output_tokens = True
-            output_tokens += int(event["output_tokens"])
-        if event.get("event_type") == "resource_sample":
-            for key, value in event.get("observations", {}).items():
-                if isinstance(value, (int, float)):
-                    resource_maxima[key] = max(resource_maxima.get(key, float("-inf")), float(value))
+            intervention_categories[str(event.get("category", "unknown"))] += 1
+            if event.get("blocking"):
+                blocking_human_seconds += duration
+
+    for event in token_events:
+        for key in token_totals:
+            if event.get(key) is not None:
+                token_seen[key] = True
+                token_totals[key] += int(event[key])
+
+    for event in events:
+        if event.get("event_type") != "resource_sample":
+            continue
+        for key, observation in event.get("observations", {}).items():
+            resource_values[key].append((observation.get("value"), observation.get("unit", ""), observation.get("aggregation", "last")))
+
+    resource_summary = {}
+    for key, samples in sorted(resource_values.items()):
+        numeric = [float(value) for value, _, _ in samples if isinstance(value, (int, float))]
+        aggregation = samples[-1][2]
+        if not numeric:
+            value = samples[-1][0]
+        elif aggregation == "max":
+            value = max(numeric)
+        elif aggregation == "min":
+            value = min(numeric)
+        elif aggregation == "delta":
+            value = numeric[-1] - numeric[0]
+        else:
+            value = numeric[-1]
+        resource_summary[key] = {
+            "value": value,
+            "unit": samples[-1][1],
+            "aggregation": aggregation,
+            "sample_count": len(samples),
+        }
 
     unavailable = []
-    if not saw_input_tokens:
-        unavailable.append("input_tokens")
-    if not saw_output_tokens:
-        unavailable.append("output_tokens")
+    for key, seen in token_seen.items():
+        if not seen:
+            unavailable.append(key)
     return {
         "summary_id": f"telemetry-summary:{uuid.uuid4()}",
         "included_events": len(included),
@@ -62,10 +92,11 @@ def summarize(events: list[dict[str, Any]]) -> dict[str, Any]:
         "failures": failures,
         "retries": retries,
         "human_interventions": interventions,
-        "input_tokens": input_tokens if saw_input_tokens else None,
-        "output_tokens": output_tokens if saw_output_tokens else None,
+        **{key: token_totals[key] if token_seen[key] else None for key in token_totals},
         "timing_seconds": dict(sorted(timing.items())),
-        "resource_summary": {"max_observed": dict(sorted(resource_maxima.items()))},
+        "resource_summary": resource_summary,
+        "human_interventions_by_category": dict(sorted(intervention_categories.items())),
+        "blocking_human_seconds": blocking_human_seconds,
         "by_stage": dict(sorted(by_stage.items())),
         "unavailable_metrics": unavailable,
     }

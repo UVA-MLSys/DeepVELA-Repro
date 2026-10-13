@@ -13,6 +13,8 @@ Treat the control environment and every benchmark or evaluator environment as
 separate runtime sessions. Record requested, provider-allocated, directly
 observed, inferred, and unavailable fields separately. Capture hardware and
 software from inside the runtime that actually executes the workload.
+When profiling is enabled, sample resource use from that same runtime rather
+than substituting measurements from the controller host.
 
 A reconnect, scheduler reallocation, or runtime replacement creates a new
 runtime-session identity. Do not reuse the control host's hardware record for a

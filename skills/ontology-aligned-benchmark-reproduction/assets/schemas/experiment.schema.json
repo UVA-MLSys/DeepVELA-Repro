@@ -20,6 +20,7 @@
         "tool_access",
         "budgets",
         "intervention_policy"
+        ,"condition_digest"
       ],
       "properties": {
         "condition_id": {
@@ -46,6 +47,9 @@
             "type": "string"
           }
         },
+        "visible_ontology_elements": {"type": "array", "items": {"type": "string"}},
+        "visible_source_ids": {"type": "array", "items": {"type": "string"}},
+        "hidden_source_ids": {"type": "array", "items": {"type": "string"}},
         "agent_configuration": {
           "type": "object"
         },
@@ -72,7 +76,67 @@
         },
         "intervention_policy": {
           "type": "object"
-        }
+        },
+        "network_policy": {
+          "enum": ["disabled", "allowlisted", "unrestricted_recorded"]
+        },
+        "filesystem_policy": {
+          "enum": ["condition_workspace_only", "allowlisted_read_only", "unrestricted_recorded"]
+        },
+        "prompt_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$"},
+        "skill_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$"},
+        "visible_bundle_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$"},
+        "condition_digest": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
+        "created_at": {"type": "string"}
+      }
+    },
+    "assessment_seal": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "assessment-seal.schema.json",
+      "title": "Independent benchmark assessment seal",
+      "type": "object",
+      "required": [
+        "seal_id",
+        "assessment_id",
+        "assessment_sha256",
+        "assessor_identity",
+        "independent_of_execution",
+        "reviewed_at"
+      ],
+      "properties": {
+        "seal_id": {"type": "string"},
+        "assessment_id": {"type": "string"},
+        "assessment_sha256": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
+        "assessor_identity": {"type": "string", "minLength": 1},
+        "independent_of_execution": {"const": true},
+        "review_notes": {"type": "string"},
+        "reviewed_at": {"type": "string"}
+      }
+    },
+    "condition_bundle_manifest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "condition-bundle-manifest.schema.json",
+      "title": "Materialized controlled-condition bundle",
+      "type": "object",
+      "required": ["condition_id", "files", "withheld_paths", "isolation_verified", "bundle_sha256", "created_at"],
+      "properties": {
+        "condition_id": {"type": "string"},
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "sha256", "size_bytes"],
+            "properties": {
+              "path": {"type": "string"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
+              "size_bytes": {"type": "integer", "minimum": 0}
+            }
+          }
+        },
+        "withheld_paths": {"type": "array", "items": {"type": "string"}},
+        "isolation_verified": {"type": "boolean"},
+        "bundle_sha256": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
+        "created_at": {"type": "string"}
       }
     },
     "trial_summary": {
@@ -158,6 +222,12 @@
   "oneOf": [
     {
       "$ref": "#/$defs/experiment_condition"
+    },
+    {
+      "$ref": "#/$defs/assessment_seal"
+    },
+    {
+      "$ref": "#/$defs/condition_bundle_manifest"
     },
     {
       "$ref": "#/$defs/trial_summary"

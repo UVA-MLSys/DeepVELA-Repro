@@ -5,14 +5,15 @@ from __future__ import annotations
 
 import argparse
 import shutil
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from _common import canonical_digest, read_json, require_campaign_root, sha256_file, utc_now, validate_schema_record, write_json_atomic
 
 
 def safe_relative(value: str) -> Path:
     path = Path(value)
-    if path.is_absolute() or ".." in path.parts:
+    windows = PureWindowsPath(value)
+    if path.is_absolute() or windows.is_absolute() or windows.drive or ".." in path.parts or ".." in windows.parts:
         raise ValueError(f"condition paths must be relative and traversal-free: {value}")
     return path
 

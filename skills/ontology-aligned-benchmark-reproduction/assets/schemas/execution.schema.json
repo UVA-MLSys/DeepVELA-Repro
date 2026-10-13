@@ -318,6 +318,9 @@
         "media_type": {
           "type": "string"
         },
+        "storage_kind": {"enum": ["campaign_path", "content_addressed"]},
+        "cas_uri": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-fA-F]{64}$"},
+        "logical_name": {"type": ["string", "null"]},
         "dependencies": {
           "type": "array",
           "items": {

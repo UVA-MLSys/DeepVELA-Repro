@@ -12,6 +12,7 @@ campaign/
   planning/       action, resource, risk, and preflight plans
   runtimes/       runtime sessions and hardware/software snapshots
   attempts/       immutable attempt manifests, effects, artifacts, terminals
+  artifact-store/ content-addressed immutable objects shared by artifact records
   verification/   checks, comparisons, and discrepancies
   decisions/      acceptance and human decisions
   state/          campaign state and invalidations
@@ -24,6 +25,10 @@ Use JSON for singleton records and JSONL for append-oriented collections. Keep
 IDs globally unique within a campaign. Store relative artifact paths when the
 campaign is portable. Hash files with SHA-256 and verify read-back before they
 support acceptance.
+
+Use content-addressed storage for large or repeated artifacts. Logical artifact
+records remain separate because role, target, producer, and dependency lineage
+can differ even when their bytes are identical.
 
 Resume from persisted state, not chat history. Before resuming, validate record
 schemas, file readability, graph edges, invalidation state, and the last phase

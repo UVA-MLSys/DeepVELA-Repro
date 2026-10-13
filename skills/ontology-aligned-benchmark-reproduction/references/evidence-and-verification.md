@@ -2,6 +2,8 @@
 
 An artifact is an output. It becomes evidence only when a declared check
 consumes it, verifies named obligations, and records a current result.
+Content-addressed storage may deduplicate identical bytes, but never merges
+their logical evidence records or provenance.
 
 Prefer the benchmark-owned evaluator. If a separate verifier is used, freeze
 its identity and policy before inspecting the complete cohort. Keep evaluator

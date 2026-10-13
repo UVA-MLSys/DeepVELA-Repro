@@ -45,3 +45,9 @@ withheld paths. The bundle manifest proves file visibility and content digests;
 the execution controller must separately enforce the declared network and
 filesystem policy. Seal readiness scores through an assessor independent of the
 execution agent before trials begin.
+
+Emit one versioned trial summary per run. Keep fixed fields for result quality,
+obligation and artifact coverage, tool calls, provider-reported tokens, retries,
+errors, human interventions, classified timing, runtime resources, invalidation
+outcomes, and source-record digests. Report unavailable values as null rather
+than estimating them.

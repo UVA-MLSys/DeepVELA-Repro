@@ -119,3 +119,8 @@ benchmark runtime from inside that runtime with `sample_runtime_resources.py`,
 and materialize visible/withheld inputs with
 `materialize_experiment_condition.py`. For readiness experiments, use an
 independent assessor and seal the completed assessment before execution.
+Store large or repeated outputs with `scripts/store_artifact.py` so identical
+bytes share one SHA-256 object while retaining distinct logical evidence IDs.
+After each controlled trial, run `scripts/summarize_trial.py` to emit the fixed
+quality, evidence, tool, token, timing, resource, intervention, retry, and
+invalidation fields used for cross-condition analysis.

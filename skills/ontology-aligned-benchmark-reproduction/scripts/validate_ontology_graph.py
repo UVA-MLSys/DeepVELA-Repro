@@ -162,7 +162,29 @@ def validate(root: Path, phase: str | None = None) -> dict[str, Any]:
     for condition_path in sorted((root / "experiment" / "conditions").glob("*/condition.json")) if (root / "experiment" / "conditions").exists() else []:
         schema_issue(errors, str(condition_path.relative_to(root)), "experiment_condition", read_json(condition_path))
     for manifest_path in sorted((root / "experiment" / "conditions").glob("*/bundle-manifest.json")) if (root / "experiment" / "conditions").exists() else []:
-        schema_issue(errors, str(manifest_path.relative_to(root)), "condition_bundle_manifest", read_json(manifest_path))
+        manifest = read_json(manifest_path)
+        schema_issue(errors, str(manifest_path.relative_to(root)), "condition_bundle_manifest", manifest)
+        visible_root = (manifest_path.parent / "visible").resolve()
+        observed_files = []
+        for item in manifest.get("files", []):
+            candidate = (visible_root / item["path"]).resolve()
+            try:
+                candidate.relative_to(visible_root)
+            except ValueError:
+                errors.append(issue("condition_path_escape", "bundle manifest path escapes visible root", [item["path"]]))
+                continue
+            if not candidate.is_file() or sha256_file(candidate) != item.get("sha256"):
+                errors.append(issue("condition_bundle_mismatch", "visible condition file is missing or changed", [item["path"]]))
+            else:
+                observed_files.append(item)
+        if canonical_digest(observed_files) != manifest.get("bundle_sha256"):
+            errors.append(issue("condition_bundle_digest_mismatch", "condition bundle digest does not match inventory"))
+        leaked = [value for value in manifest.get("withheld_paths", []) if (visible_root / value).exists()]
+        if leaked or not manifest.get("isolation_verified"):
+            errors.append(issue("condition_isolation_failure", "withheld condition content is visible", leaked))
+    trial_summary_path = root / "experiment" / "trial-summary.json"
+    if trial_summary_path.exists():
+        schema_issue(errors, "experiment/trial-summary.json", "trial_summary", read_json(trial_summary_path))
 
     if set(contract.get("target_ids", [])) != set(targets):
         errors.append(issue("target_scope_mismatch", "contract and target manifest target IDs differ"))
@@ -244,6 +266,8 @@ def validate(root: Path, phase: str | None = None) -> dict[str, Any]:
                     errors.append(issue("missing_current_artifact", "current artifact path is not readable", [artifact_id]))
                 elif sha256_file(path) != artifact.get("sha256"):
                     errors.append(issue("artifact_digest_mismatch", "current artifact digest does not match bytes on disk", [artifact_id]))
+            if artifact.get("storage_kind") == "content_addressed" and artifact.get("cas_uri") != f"sha256:{artifact.get('sha256')}":
+                errors.append(issue("invalid_cas_identity", "content-addressed artifact URI does not match its digest", [artifact_id]))
         for comparison_id, comparison in comparisons.items():
             unknown = [value for value in [comparison.get("actual_artifact_id"), comparison.get("reference_artifact_id")] if value not in artifacts]
             if unknown:

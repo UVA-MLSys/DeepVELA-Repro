@@ -29,7 +29,7 @@ def summarize(events: list[dict[str, Any]]) -> dict[str, Any]:
         stage = str(event.get("stage", "unassigned"))
         by_stage[stage]["events"] += 1
         duration = float(event.get("duration_seconds", 0.0) or 0.0)
-        if event.get("event_type") in {"tool_call", "stage_span"}:
+        if event.get("event_type") == "stage_span":
             by_stage[stage]["duration_seconds"] += duration
         if event.get("event_type") == "stage_span":
             timing[str(event["classification"])] += duration

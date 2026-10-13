@@ -145,9 +145,13 @@
       "title": "Trial summary",
       "type": "object",
       "required": [
+        "schema_version",
         "trial_id",
         "condition_id",
         "campaign_id",
+        "controller_realization",
+        "benchmark_readiness_score",
+        "target_count",
         "disposition_counts",
         "reproduction_quality",
         "evidence_coverage",
@@ -156,7 +160,9 @@
         "errors",
         "human_interventions",
         "timing_seconds",
-        "invalidation_outcomes"
+        "invalidation_outcomes",
+        "source_digests",
+        "generated_at"
       ],
       "properties": {
         "trial_id": {
@@ -168,14 +174,38 @@
         "campaign_id": {
           "type": "string"
         },
+        "schema_version": {"const": "1.0"},
+        "controller_realization": {"type": "string"},
+        "benchmark_readiness_score": {"type": ["number", "null"], "minimum": 0, "maximum": 5},
+        "target_count": {"type": "integer", "minimum": 0},
         "disposition_counts": {
-          "type": "object"
+          "type": "object",
+          "required": ["accepted", "rejected", "inconclusive", "blocked"],
+          "additionalProperties": {"type": "integer", "minimum": 0}
         },
         "reproduction_quality": {
-          "type": "object"
+          "type": "object",
+          "required": ["comparisons", "passed", "failed", "inconclusive", "mean_absolute_percentage_difference", "maximum_absolute_percentage_difference"],
+          "properties": {
+            "comparisons": {"type": "integer", "minimum": 0},
+            "passed": {"type": "integer", "minimum": 0},
+            "failed": {"type": "integer", "minimum": 0},
+            "inconclusive": {"type": "integer", "minimum": 0},
+            "mean_absolute_percentage_difference": {"type": ["number", "null"], "minimum": 0},
+            "maximum_absolute_percentage_difference": {"type": ["number", "null"], "minimum": 0}
+          }
         },
         "evidence_coverage": {
-          "type": "object"
+          "type": "object",
+          "required": ["required_obligations", "verified_obligations", "obligation_ratio", "required_artifact_roles", "present_artifact_roles", "artifact_role_ratio"],
+          "properties": {
+            "required_obligations": {"type": "integer", "minimum": 0},
+            "verified_obligations": {"type": "integer", "minimum": 0},
+            "obligation_ratio": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "required_artifact_roles": {"type": "integer", "minimum": 0},
+            "present_artifact_roles": {"type": "integer", "minimum": 0},
+            "artifact_role_ratio": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+          }
         },
         "tool_calls": {
           "type": "integer",
@@ -215,7 +245,9 @@
         },
         "invalidation_outcomes": {
           "type": "object"
-        }
+        },
+        "source_digests": {"type": "object", "additionalProperties": {"type": "string"}},
+        "generated_at": {"type": "string"}
       }
     }
   },

@@ -1,0 +1,169 @@
+{
+  "source_repository": "https://github.com/khairulislam/Agentic-Reproduce",
+  "configurations": {
+    "reproduce": "Reproduce (Skill-guided)",
+    "builder-reproduce": "Builder + Reproduce"
+  },
+  "packages": [
+    {
+      "harness": "claude",
+      "name": "reproduce",
+      "source_ref": "main",
+      "source_commit": "06197179eeada64e4c67565f4929f6e651bfa2bf",
+      "source_directory": "skills/baseline-reproduce",
+      "published_directory": "skills/claude/reproduce",
+      "changes": [
+        "Rename baseline-reproduce to reproduce and benchmark-builder to builder-reproduce in package names and active references.",
+        "Use the published configuration name in the entry-point title."
+      ],
+      "files": [
+        {
+          "path": "SKILL.md",
+          "source_sha256": "dff83fa9bd2381bda466aa12930e278e997d0fdecd84aa4e31343025d3637d9a",
+          "published_sha256": "7be33c784418723c96be6b18d38609608157193aa5956b658aacacf70c37133b",
+          "unchanged": false
+        }
+      ]
+    },
+    {
+      "harness": "claude",
+      "name": "builder-reproduce",
+      "source_ref": "main",
+      "source_commit": "06197179eeada64e4c67565f4929f6e651bfa2bf",
+      "source_directory": "skills/benchmark-builder",
+      "published_directory": "skills/claude/builder-reproduce",
+      "changes": [
+        "Rename baseline-reproduce to reproduce and benchmark-builder to builder-reproduce in package names and active references.",
+        "Use the published configuration name in the entry-point title.",
+        "Clarify the combined configuration description and required sibling Reproduce installation."
+      ],
+      "files": [
+        {
+          "path": "SKILL.md",
+          "source_sha256": "d1b543c4a95e4628f626c90e9b0bb9f9f95adc8709e76f844c1d88adace243f7",
+          "published_sha256": "644e0830b3f0fdcb06e9379981e3c7268d134e0ceca34b7e57a3671bcd2247d5",
+          "unchanged": false
+        },
+        {
+          "path": "assets/benchmark_card_template.md",
+          "source_sha256": "40802b6443792ba671cd414ccb8e3331309b20d5640edae3e21a86cbd96a521d",
+          "published_sha256": "5180e02bae3480e7dd07f3b3f1a6e8ead897cad4835e8d703233444f250771db",
+          "unchanged": false
+        },
+        {
+          "path": "assets/rubric_template.yaml",
+          "source_sha256": "7ee33a16b2f7bd42990b4434c32cf7c62d341119ae33c0266850a75b47c4ca19",
+          "published_sha256": "7ee33a16b2f7bd42990b4434c32cf7c62d341119ae33c0266850a75b47c4ca19",
+          "unchanged": true
+        },
+        {
+          "path": "assets/submission_report_template.md",
+          "source_sha256": "751f0bfa955659ce5634c8a6c7567965de8095eadad6e20776d92557f7215d92",
+          "published_sha256": "751f0bfa955659ce5634c8a6c7567965de8095eadad6e20776d92557f7215d92",
+          "unchanged": true
+        },
+        {
+          "path": "references/ontology.md",
+          "source_sha256": "7c40a5c61bd1c204c579fc936c50587e97e49e3a1532a600e2457f70ad32f79a",
+          "published_sha256": "7c40a5c61bd1c204c579fc936c50587e97e49e3a1532a600e2457f70ad32f79a",
+          "unchanged": true
+        },
+        {
+          "path": "scripts/metrics.py",
+          "source_sha256": "44513a209fd6ee7055dd79ce5989c0fe02653ec1774883fbf8ea3f64186dbf46",
+          "published_sha256": "44513a209fd6ee7055dd79ce5989c0fe02653ec1774883fbf8ea3f64186dbf46",
+          "unchanged": true
+        },
+        {
+          "path": "scripts/score_benchmark.py",
+          "source_sha256": "4337dc7c644524d324f907d014e445e621df7cc05afc1549481b4bde3a4dd9a6",
+          "published_sha256": "4337dc7c644524d324f907d014e445e621df7cc05afc1549481b4bde3a4dd9a6",
+          "unchanged": true
+        }
+      ]
+    },
+    {
+      "harness": "codex",
+      "name": "reproduce",
+      "source_ref": "main",
+      "source_commit": "e4b0e24ecc9436f66fca02287c785db3ba99fb35",
+      "source_directory": "skills/baseline-reproduce",
+      "published_directory": "skills/codex/reproduce",
+      "changes": [
+        "Rename baseline-reproduce to reproduce and benchmark-builder to builder-reproduce in package names and active references.",
+        "Use the published configuration name in the entry-point title."
+      ],
+      "files": [
+        {
+          "path": "SKILL.md",
+          "source_sha256": "9f95490f28fb369665aa458ebe6b443d82db096540d98b106a4e1445c9d0de43",
+          "published_sha256": "a119b370ef676d41fb5c51ce31fc87f14c2b14353bdb36a4117c21d480f31c84",
+          "unchanged": false
+        }
+      ]
+    },
+    {
+      "harness": "codex",
+      "name": "builder-reproduce",
+      "source_ref": "main",
+      "source_commit": "e4b0e24ecc9436f66fca02287c785db3ba99fb35",
+      "source_directory": "skills/benchmark-builder",
+      "published_directory": "skills/codex/builder-reproduce",
+      "changes": [
+        "Rename baseline-reproduce to reproduce and benchmark-builder to builder-reproduce in package names and active references.",
+        "Use the published configuration name in the entry-point title.",
+        "Replace Claude-specific Skill-tool handoff with loading Reproduce in the same Codex session.",
+        "Clarify the combined configuration description and required sibling Reproduce installation."
+      ],
+      "files": [
+        {
+          "path": "SKILL.md",
+          "source_sha256": "d1b543c4a95e4628f626c90e9b0bb9f9f95adc8709e76f844c1d88adace243f7",
+          "published_sha256": "3f0e2b10e72817e6cce9dc614b24210f32b0352dcf9d99e1e8527cfe2fbd98d0",
+          "unchanged": false
+        },
+        {
+          "path": "assets/benchmark_card_template.md",
+          "source_sha256": "40802b6443792ba671cd414ccb8e3331309b20d5640edae3e21a86cbd96a521d",
+          "published_sha256": "5180e02bae3480e7dd07f3b3f1a6e8ead897cad4835e8d703233444f250771db",
+          "unchanged": false
+        },
+        {
+          "path": "assets/rubric_template.yaml",
+          "source_sha256": "7ee33a16b2f7bd42990b4434c32cf7c62d341119ae33c0266850a75b47c4ca19",
+          "published_sha256": "7ee33a16b2f7bd42990b4434c32cf7c62d341119ae33c0266850a75b47c4ca19",
+          "unchanged": true
+        },
+        {
+          "path": "assets/submission_report_template.md",
+          "source_sha256": "751f0bfa955659ce5634c8a6c7567965de8095eadad6e20776d92557f7215d92",
+          "published_sha256": "751f0bfa955659ce5634c8a6c7567965de8095eadad6e20776d92557f7215d92",
+          "unchanged": true
+        },
+        {
+          "path": "references/ontology.md",
+          "source_sha256": "7c40a5c61bd1c204c579fc936c50587e97e49e3a1532a600e2457f70ad32f79a",
+          "published_sha256": "7c40a5c61bd1c204c579fc936c50587e97e49e3a1532a600e2457f70ad32f79a",
+          "unchanged": true
+        },
+        {
+          "path": "scripts/metrics.py",
+          "source_sha256": "44513a209fd6ee7055dd79ce5989c0fe02653ec1774883fbf8ea3f64186dbf46",
+          "published_sha256": "44513a209fd6ee7055dd79ce5989c0fe02653ec1774883fbf8ea3f64186dbf46",
+          "unchanged": true
+        },
+        {
+          "path": "scripts/score_benchmark.py",
+          "source_sha256": "4337dc7c644524d324f907d014e445e621df7cc05afc1549481b4bde3a4dd9a6",
+          "published_sha256": "4337dc7c644524d324f907d014e445e621df7cc05afc1549481b4bde3a4dd9a6",
+          "unchanged": true
+        }
+      ]
+    }
+  ],
+  "version_notes": {
+    "claude": "Snapshot of source main at migration time.",
+    "codex": "Frozen source-main revision recorded in the six-model Codex campaign preparation receipt; both entry-point digests were verified before renaming.",
+    "branch_selection": "The older eric-skill branch is not the package revision recorded for the Codex study."
+  }
+}

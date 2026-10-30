@@ -1,0 +1,143 @@
+# MLCommons Science Benchmarks Ontology — rating rubric checklist
+# (arXiv:2511.05614, Section III)
+#
+# Fill in every `met:` / level field below with evidence, not assumption — for each item
+# you mark true, be able to point to the specific file, section, or sentence that satisfies
+# it. Leave a field as `null` if genuinely unanswered; scripts/score_benchmark.py will
+# refuse to score a category with unanswered items rather than silently treating them as
+# false, so you don't end up under- or over-scoring by accident.
+#
+# Run: python scripts/score_benchmark.py path/to/this_file.yaml
+
+benchmark_name: ""            # name of the benchmark being scored
+scored_date: ""               # e.g. "2026-08-14"
+notes: ""                     # free text, anything a future reader should know about this scoring pass
+
+# --- Category 1: Software Environment (1 point per true item, max 5) ---
+software_environment:
+  - id: code_available
+    description: "The code is available to reproduce the baseline reference solution."
+    met: null                 # true | false
+    evidence: ""              # where you verified this
+  - id: code_complete
+    description: "The provided code is complete."
+    met: null
+    evidence: ""
+  - id: code_documented
+    description: "The code itself is well documented."
+    met: null
+    evidence: ""
+  - id: code_runs_unmodified
+    description: "The code does not require any modifications to run."
+    met: null
+    evidence: ""
+  - id: env_specified
+    description: "The environment is either containerized, or environment details and setup instructions are provided."
+    met: null
+    evidence: ""
+
+# --- Category 2: Problem Specification and Constraints (1 point per true item, max 5) ---
+problem_specification:
+  - id: constraints_provided
+    description: "System constraints (power, latency, throughput, etc.) are provided."
+    met: null
+    evidence: ""
+  - id: task_clear
+    description: "The benchmark task is clear."
+    met: null
+    evidence: ""
+  - id: dataset_format_specified
+    description: "The dataset format is clearly specified."
+    met: null
+    evidence: ""
+  - id: inputs_specified
+    description: "The task inputs are clearly specified."
+    met: null
+    evidence: ""
+  - id: outputs_specified
+    description: "The task outputs are clearly specified."
+    met: null
+    evidence: ""
+
+# --- Category 3: Dataset (4 FAIR points + 1 splits point, max 5) ---
+dataset:
+  fair:
+    - id: findable
+      description: "Each instance is uniquely identified and documented (Findable)."
+      met: null
+      evidence: ""
+    - id: accessible
+      description: "Access is provided through persistent, open protocols (Accessible)."
+      met: null
+      evidence: ""
+    - id: interoperable
+      description: "Formats and metadata follow community standards (Interoperable)."
+      met: null
+      evidence: ""
+    - id: reusable
+      description: "Versioning with associated preprocessing scripts enables full reproducibility (Reusable)."
+      met: null
+      evidence: ""
+  splits_defined:
+    description: "A canonical, non-overlapping train/validation/test split is provided."
+    met: null
+    evidence: ""
+
+# --- Category 4: Performance Metrics (Definitions 0-3 + Quality 0-2, max 5) ---
+performance_metrics:
+  definition_level: null      # 0, 1, 2, or 3 — see references/ontology.md Part 2 Category 4 for the level descriptions
+  definition_evidence: ""
+  quality_level: null         # 0, 1, or 2
+  quality_evidence: ""
+
+# --- Category 5: Reference Solution (1 point per true item, max 5) ---
+reference_solution:
+  - id: publicly_available
+    description: "A reference solution is publicly available."
+    met: null
+    evidence: ""
+  - id: well_documented
+    description: "The provided reference solution is well documented."
+    met: null
+    evidence: ""
+  - id: requirements_listed
+    description: "All hardware and/or software requirements to run the reference solution are listed."
+    met: null
+    evidence: ""
+  - id: metrics_evaluated
+    description: "All metrics defined as part of the benchmark are evaluated as part of the reference solution."
+    met: null
+    evidence: ""
+  - id: baseline_open
+    description: "The baseline solution/model is openly available for study (architecture, hyperparameters, and training code if a neural network)."
+    met: null
+    evidence: ""
+
+# --- Category 6: Documentation (1 point per true item, max 5) ---
+documentation:
+  - id: task_explained
+    description: "The task is explained and well documented."
+    met: null
+    evidence: ""
+  - id: background_explained
+    description: "The task and benchmark background (scientific and otherwise) is clearly explained."
+    met: null
+    evidence: ""
+  - id: motivation_explained
+    description: "The motivation for the benchmark is clearly explained."
+    met: null
+    evidence: ""
+  - id: evaluation_explained
+    description: "The evaluation criteria are clearly explained."
+    met: null
+    evidence: ""
+  - id: paper_exists
+    description: "An academic paper about the benchmark exists."
+    met: null
+    evidence: ""
+
+# --- Motif tagging (not scored, but expected metadata — see references/ontology.md Part 3) ---
+motifs:
+  scientific_motifs: []       # e.g. ["High-Energy Physics"] — a benchmark may have several
+  ai_ml_motif: ""             # e.g. "Regression" — exactly one
+  computing_motifs: []        # optional, e.g. ["Latency Bound"]

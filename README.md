@@ -30,16 +30,3 @@ Invoke `reproduce` for reproduction alone. For Builder + Reproduce, invoke
 `builder-reproduce`, request the ontology assessment and score, and continue
 with `reproduce` in the same session. Builder scoring requires Python 3 and
 PyYAML (`python -m pip install pyyaml`).
-
-## Sources
-
-These packages come from [Agentic-Reproduce](https://github.com/khairulislam/Agentic-Reproduce).
-The Claude packages use source `main` at `06197179eeada64e4c67565f4929f6e651bfa2bf`.
-The Codex packages preserve the study snapshot at
-`e4b0e24ecc9436f66fca02287c785db3ba99fb35`, verified against its preparation receipt.
-Names and the Codex handoff instruction have been updated for this layout.
-Scientific procedures and deterministic scoring code are otherwise preserved.
-The newer Claude Reproduce snapshot includes two additional bounded-preflight
-and repair-validation rules, so the two snapshots are recorded separately.
-
-[Source revisions and file hashes](skills/SOURCES.json) document the migration.

@@ -218,3 +218,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Agent harness directories: track only the project-skill links
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/agent-evaluation-profile
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/agent-evaluation-profile

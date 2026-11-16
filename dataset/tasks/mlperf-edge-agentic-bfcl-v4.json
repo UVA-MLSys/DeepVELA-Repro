@@ -1,0 +1,47 @@
+{
+  "source_id": "mlperf-edge-agentic-bfcl-v4",
+  "repo": {
+    "url": "https://github.com/mlcommons/endpoints.git",
+    "path": ".cache/sources/endpoints",
+    "commit": "d3c57f2eba127c819e5a8fd83101d9e5f4e15fce",
+    "directory": "examples/11_Edge_Agentic_Example"
+  },
+  "domain": "function calling",
+  "language": "Python",
+  "support_level": "readme_only",
+  "policy": {
+    "compute": "slurm",
+    "platform": "one NVIDIA A100 80GB GPU per run.",
+    "inputs": {
+      "MODEL_FILE": {
+        "path": ".cache/edge-agentic/bfcl_v4/models/Qwen3.6-27B-Q4_K_M.gguf",
+        "holds": "the Qwen3.6-27B Q4_K_M GGUF"
+      }
+    },
+    "forbidden": "the MLPerf Inference results repositories (mlcommons/inference_results_*), published MLPerf submissions, or the MLCommons results tables, or the language/edge-agentic README of mlcommons/inference",
+    "wall_clock_cap": "4 hours"
+  },
+  "env_groups": [
+    {
+      "id": "edge-agentic-env",
+      "tasks": [
+        "edge-agentic"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "edge-agentic",
+      "task_prompt": "Run `inference-endpoint benchmark from-config --config online_edge_full_run.yaml --accuracy-only` (BFCL v4 single-turn, about 995 samples) against a llama.cpp `llama-server` serving the Qwen3.6-27B Q4_K_M GGUF in MODEL_FILE, at the README's server settings.",
+      "results": [
+        "overall_accuracy",
+        "normalized_single_turn_score"
+      ],
+      "outputs": {
+        "accuracy_results.json": "the scorer's accuracy_results.json from the run's report directory",
+        "config.yaml": "the resolved config.yaml the run wrote to its report directory",
+        "llama-server.log": "the llama-server log"
+      }
+    }
+  ]
+}

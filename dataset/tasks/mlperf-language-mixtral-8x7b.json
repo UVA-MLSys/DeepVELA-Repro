@@ -1,0 +1,60 @@
+{
+  "source_id": "mlperf-language-mixtral-8x7b",
+  "repo": {
+    "url": "https://github.com/mlcommons/inference.git",
+    "path": ".cache/sources/inference",
+    "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+    "directory": "language/mixtral-8x7b"
+  },
+  "domain": "text generation",
+  "language": "Python",
+  "support_level": "readme_only",
+  "policy": {
+    "compute": "slurm",
+    "platform": "two NVIDIA A100 80GB GPUs per run.",
+    "inputs": {
+      "DATASET_FILE": {
+        "path": ".cache/mixtral-8x7b/dataset/09292024_mixtral_15k_mintoken2_v1.pkl"
+      },
+      "MODEL_DIR": {
+        "path": ".cache/mixtral-8x7b/model",
+        "holds": "the Mixtral-8x7B-Instruct-v0.1 weights"
+      }
+    },
+    "forbidden": "the MLPerf Inference results repositories (mlcommons/inference_results_*), published MLPerf submissions, or the MLCommons results tables",
+    "wall_clock_cap": "8 hours"
+  },
+  "env_groups": [
+    {
+      "id": "mixtral-8x7b-env",
+      "tasks": [
+        "mixtral-8x7b"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "mixtral-8x7b",
+      "task_prompt": "Run `python -u main.py --scenario Offline --accuracy` at the README precision over the 15,000-sample OpenOrca, GSM8K and MBXP validation set in DATASET_FILE, then evaluate-accuracy.py on its LoadGen accuracy log.",
+      "results": [
+        "rouge1",
+        "rouge2",
+        "rougeL",
+        "gsm8k",
+        "mbxp",
+        "tokens_per_sample"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "torch cuda: ": "the value of `torch.cuda.is_available()` and the GPU names, written by the process that runs the model"
+      },
+      "hints": [
+        "Known properties of the reference code, measured on two A100: the checkpoint in MODEL_DIR is stored in fp32 (174 GB) and the reference SUT loads it at that precision, which does not fit in 2 x 80 GB, so part of the model is offloaded to the CPU and generation takes about 346 s per sample. main.py defaults --batch-size to 1 (13.7 s per sample with a fp16 load, about 57 hours for 15,000 samples), and the reference code fails at batch sizes above 1. Size the run so the full pass fits the time limit."
+      ]
+    }
+  ]
+}

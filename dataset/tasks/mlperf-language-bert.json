@@ -1,0 +1,58 @@
+{
+  "source_id": "mlperf-language-bert",
+  "repo": {
+    "url": "https://github.com/mlcommons/inference.git",
+    "path": ".cache/sources/inference",
+    "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+    "directory": "language/bert"
+  },
+  "domain": "question answering",
+  "language": "Python",
+  "support_level": "readme_only",
+  "policy": {
+    "compute": "slurm",
+    "platform": "one NVIDIA A100 80GB GPU per run.",
+    "inputs": {
+      "SQUAD_DIR": {
+        "path": ".cache/bert-squad/data",
+        "holds": "dev-v1.1.json"
+      },
+      "MODEL_DIR": {
+        "path": ".cache/bert-squad/model",
+        "holds": "model.pytorch and vocab.txt"
+      },
+      "DEEPLEARNING_EXAMPLES_DIR": {
+        "path": ".cache/bert-squad/DeepLearningExamples",
+        "holds": "a clone of https://github.com/NVIDIA/DeepLearningExamples.git at commit 729963dd47e7c8bd462ad10bfac7a7b0b604e6dd, the directory language/bert/pytorch_SUT.py imports from as language/bert/DeepLearningExamples; the pinned repository lists it in .gitmodules but does not track it, so it is not in ./repo"
+      }
+    },
+    "forbidden": "the MLPerf Inference results repositories (mlcommons/inference_results_*), published MLPerf submissions, or the MLCommons results tables",
+    "wall_clock_cap": "2 hours"
+  },
+  "env_groups": [
+    {
+      "id": "bert-squad-env",
+      "tasks": [
+        "bert-squad"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "bert-squad",
+      "task_prompt": "Run `python3 run.py --backend=pytorch --accuracy` (scenario Offline, the default) on the BERT-Large fp32 model in MODEL_DIR over the SQuAD v1.1 validation set, then accuracy-squad.py (which calls evaluate_v1.1.py) on its LoadGen accuracy log.",
+      "results": [
+        "exact_match",
+        "f1"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "pytorch device: ": "the device the model's parameters are on"
+      }
+    }
+  ]
+}

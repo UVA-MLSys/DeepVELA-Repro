@@ -1,0 +1,190 @@
+{
+  "source_id": "mlperf-vision-classification-and-detection",
+  "repo": {
+    "url": "https://github.com/mlcommons/inference.git",
+    "path": ".cache/sources/inference",
+    "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+    "directory": "vision/classification_and_detection"
+  },
+  "domain": "image classification and object detection",
+  "language": "Python",
+  "support_level": "readme_only",
+  "policy": {
+    "compute": "slurm",
+    "platform": "one NVIDIA A100 80GB GPU per run.",
+    "inputs": {
+      "IMAGENET_DIR": {
+        "path": ".cache/resnet50-pytorch/imagenet_val/imagenet2012"
+      },
+      "OPENIMAGES_DIR": {
+        "path": ".cache/classification-and-detection/openimages"
+      },
+      "TF_MODEL_DIR": {
+        "path": ".cache/classification-and-detection/resnet50-tf/model"
+      },
+      "ONNX_MODEL_DIR": {
+        "path": ".cache/resnet50-onnxruntime/model"
+      },
+      "PYTORCH_MODEL_DIR": {
+        "path": ".cache/resnet50-pytorch/model"
+      },
+      "INT8_MODEL_DIR": {
+        "path": ".cache/classification-and-detection/resnet50-pytorch-int8/model"
+      },
+      "NCNN_MODEL_DIR": {
+        "path": ".cache/classification-and-detection/resnet50-ncnn/model"
+      },
+      "RETINANET_MODEL_DIR": {
+        "path": ".cache/classification-and-detection/retinanet/model"
+      }
+    },
+    "forbidden": "the MLPerf Inference results repositories (mlcommons/inference_results_*), published MLPerf submissions, or the MLCommons results tables"
+  },
+  "env_groups": [
+    {
+      "id": "resnet50-ncnn-env",
+      "tasks": [
+        "resnet50-ncnn"
+      ]
+    },
+    {
+      "id": "resnet50-onnxruntime-env",
+      "tasks": [
+        "resnet50-onnxruntime"
+      ]
+    },
+    {
+      "id": "resnet50-pytorch-env",
+      "tasks": [
+        "resnet50-pytorch"
+      ]
+    },
+    {
+      "id": "resnet50-pytorch-int8-env",
+      "tasks": [
+        "resnet50-pytorch-int8"
+      ]
+    },
+    {
+      "id": "resnet50-tf-env",
+      "tasks": [
+        "resnet50-tf"
+      ]
+    },
+    {
+      "id": "retinanet-onnxruntime-env",
+      "tasks": [
+        "retinanet-onnxruntime"
+      ]
+    },
+    {
+      "id": "retinanet-pytorch-env",
+      "tasks": [
+        "retinanet-pytorch"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "resnet50-ncnn",
+      "task_prompt": "Run `./run_local.sh ncnn resnet50 cpu --accuracy` (Offline scenario, LoadGen accuracy mode) on the fp32 ncnn model resnet50_v1 over the ImageNet-2012 validation set, then tools/accuracy-imagenet.py on its LoadGen accuracy log.",
+      "results": [
+        "accuracy"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "platform": "CPU only"
+    },
+    {
+      "id": "resnet50-onnxruntime",
+      "task_prompt": "Run `./run_local.sh onnxruntime resnet50 gpu --accuracy` (Offline scenario, LoadGen accuracy mode) on the fp32 model resnet50_v1.onnx over the ImageNet-2012 validation set, then tools/accuracy-imagenet.py on its LoadGen accuracy log.",
+      "results": [
+        "accuracy"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "onnxruntime providers: ": "the active providers of its inference session (`InferenceSession.get_providers()`)"
+      }
+    },
+    {
+      "id": "resnet50-pytorch",
+      "task_prompt": "Run `./run_local.sh pytorch resnet50 gpu --accuracy` (Offline scenario, LoadGen accuracy mode) on the fp32 checkpoint resnet50-19c8e357.pth over the ImageNet-2012 validation set, then tools/accuracy-imagenet.py on its LoadGen accuracy log.",
+      "results": [
+        "accuracy"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "pytorch device: ": "the device the model's parameters are on"
+      }
+    },
+    {
+      "id": "resnet50-pytorch-int8",
+      "task_prompt": "Run `./run_local.sh tvm-pytorch resnet50 cpu --accuracy` (Offline scenario, LoadGen accuracy mode) on the A:int8 W:uint8 model resnet50_INT8bit_quantized.pt over the ImageNet-2012 validation set, then tools/accuracy-imagenet.py on its LoadGen accuracy log.",
+      "results": [
+        "accuracy"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "platform": "CPU only"
+    },
+    {
+      "id": "resnet50-tf",
+      "task_prompt": "Run `./run_local.sh tf resnet50 gpu --accuracy` (Offline scenario, LoadGen accuracy mode) on the fp32 graph resnet50_v1.pb over the ImageNet-2012 validation set, then tools/accuracy-imagenet.py on its LoadGen accuracy log.",
+      "results": [
+        "accuracy"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "tensorflow gpus: ": "`tf.config.list_physical_devices('GPU')`"
+      }
+    },
+    {
+      "id": "retinanet-onnxruntime",
+      "task_prompt": "Run `./run_local.sh onnxruntime retinanet gpu --accuracy` (Offline scenario, LoadGen accuracy mode) on the fp32 model resnext50_32x4d_fpn.onnx over the OpenImages mlperf validation set at 800x800, then tools/accuracy-openimages.py on its LoadGen accuracy log.",
+      "results": [
+        "mAP"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "onnxruntime providers: ": "the active providers of its inference session (`InferenceSession.get_providers()`)"
+      }
+    },
+    {
+      "id": "retinanet-pytorch",
+      "task_prompt": "Run `./run_local.sh pytorch retinanet gpu --accuracy` (Offline scenario, LoadGen accuracy mode) on the fp32 checkpoint resnext50_32x4d_fpn.pth over the OpenImages mlperf validation set at 800x800, then tools/accuracy-openimages.py on its LoadGen accuracy log.",
+      "results": [
+        "mAP"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "pytorch device: ": "the device the model's parameters are on"
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "source_id": "mlperf-text-to-image-sdxl",
+  "repo": {
+    "url": "https://github.com/mlcommons/inference.git",
+    "path": ".cache/sources/inference",
+    "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+    "directory": "text_to_image"
+  },
+  "domain": "text-to-image generation",
+  "language": "Python",
+  "support_level": "readme_only",
+  "policy": {
+    "compute": "slurm",
+    "platform": "one NVIDIA A100 80GB GPU per run.",
+    "inputs": {
+      "DATASET_DIR": {
+        "path": ".cache/text_to_image/coco2014",
+        "holds": "the COCO-2014 5,000-caption validation subset (captions, reference images, latents)"
+      },
+      "MODEL_DIR": {
+        "path": ".cache/text_to_image/model",
+        "holds": "the Stable Diffusion XL 1.0 fp16 checkpoint"
+      }
+    },
+    "forbidden": "the MLPerf Inference results repositories (mlcommons/inference_results_*), published MLPerf submissions, or the MLCommons results tables",
+    "wall_clock_cap": "6 hours"
+  },
+  "env_groups": [
+    {
+      "id": "stable-diffusion-xl-env",
+      "tasks": [
+        "stable-diffusion-xl"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "stable-diffusion-xl",
+      "task_prompt": "Run `python3 main.py --dataset \"coco-1024\" --dataset-path coco2014 --profile stable-diffusion-xl-pytorch --accuracy --model-path model/` with --dtype fp16 (the fp16 checkpoint), --device cuda and --scenario Offline over the 5,000 COCO-2014 captions in DATASET_DIR, then tools/accuracy_coco.py on its LoadGen accuracy log.",
+      "results": [
+        "FID_SCORE"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "torch cuda: ": "the value of `torch.cuda.is_available()` and the GPU names, written by the process that runs the model"
+      }
+    }
+  ]
+}

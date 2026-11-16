@@ -1,0 +1,52 @@
+{
+  "source_id": "mlperf-speech2text-whisper",
+  "repo": {
+    "url": "https://github.com/mlcommons/inference.git",
+    "path": ".cache/sources/inference",
+    "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+    "directory": "speech2text"
+  },
+  "domain": "speech recognition",
+  "language": "Python",
+  "support_level": "readme_only",
+  "policy": {
+    "compute": "slurm",
+    "platform": "one NVIDIA A100 80GB GPU per run.",
+    "inputs": {
+      "LIBRISPEECH_DIR": {
+        "path": ".cache/whisper/LibriSpeech"
+      },
+      "MODEL_DIR": {
+        "path": ".cache/whisper/model",
+        "holds": "the whisper-large-v3 weights"
+      }
+    },
+    "forbidden": "the MLPerf Inference results repositories (mlcommons/inference_results_*), published MLPerf submissions, or the MLCommons results tables",
+    "wall_clock_cap": "2 hours"
+  },
+  "env_groups": [
+    {
+      "id": "whisper-large-v3-env",
+      "tasks": [
+        "whisper-large-v3"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "whisper-large-v3",
+      "task_prompt": "Run `./reference_mlperf_accuracy.sh` (Offline scenario, LoadGen accuracy mode) at the reference precision over LibriSpeech dev-clean and dev-other, then accuracy_eval.py on its LoadGen accuracy log.",
+      "results": [
+        "Word Error Rate"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "torch cuda: ": "the value of `torch.cuda.is_available()` and the GPU names, written by the process that runs the model"
+      }
+    }
+  ]
+}

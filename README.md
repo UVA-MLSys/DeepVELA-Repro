@@ -1,6 +1,6 @@
 # DeepVELA-Repro
 
-Agent skills for benchmark reproduction with Claude Code and Codex. A coding agent that follows these skills prepares, runs, repairs, and verifies a benchmark from its task prompt and repository documentation, and writes a measured report. The skills are written for researchers who reproduce a benchmark on their own hardware.
+Agent skills for benchmark reproduction with Claude Code and Codex. A coding agent that follows these skills prepares, runs, repairs, and verifies a benchmark from its task prompt and repository documentation, and writes a measured report. The skills are written for researchers who reproduce a benchmark on their own hardware. A launch harness sets up MLPerf Inference tasks and prepares comparable runs with and without the skills. Scoring finished runs against references is not part of this repository.
 
 ![VELA Bench architecture: a knowledge layer (ontology), a reasoning layer (agentic framework), and an experience layer (evidence)](docs/images/vela-bench-architecture.png)
 
@@ -9,8 +9,8 @@ The architecture has three layers. The knowledge layer holds the benchmark ontol
 ## Contents
 
 - [Configurations](#configurations)
-- [Install](#install)
-- [What you provide](#what-you-provide)
+- [Get started](#get-started)
+- [What the reproducing agent reads](#what-the-reproducing-agent-reads)
 - [What a run produces](#what-a-run-produces)
 - [Scoring a benchmark with the builder](#scoring-a-benchmark-with-the-builder)
 - [Repository layout](#repository-layout)
@@ -30,29 +30,37 @@ Reference-quality scores and reproduction agreement are separate assessments.
 
 Use Reproduce when the benchmark already documents its task, data, metric, and evaluator. Use Builder + Reproduce when that contract is missing or spread across a paper, code, data, and results.
 
-The Claude and Codex packages differ in the hand-off wording of `builder-reproduce`, and the Codex `reproduce` package omits two rules that the Claude package has: sampling every sub-workload in the bounded preflight run, and validating a throughput, batching, memory, or output change on a bounded run before a full run. Compare the two `SKILL.md` files before assuming the agents behave the same.
+The Claude and Codex packages contain the same procedure. They differ only in how `builder-reproduce` hands off to `reproduce`: Claude Code calls the Skill tool, and Codex loads the installed `reproduce` skill in the same session.
 
-## Install
+## Get started
 
-Choose the packages for your agent. Install `reproduce` for Skill-guided.
-For Builder + Reproduce, install both `builder-reproduce` and `reproduce` from
-the same agent directory. The builder package contains the ontology reference,
-rubric, templates, and scoring scripts; the reproduction procedure is shared
-with the standalone Reproduce configuration.
+1. Clone this repository, install the harness dependencies, and open Claude Code or Codex in its root:
 
-- Claude Code: place the selected folders under your project's `.claude/skills/`.
-- Codex: place the selected folders under your project's `.agents/skills/`.
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
 
-Invoke `reproduce` for reproduction alone. For Builder + Reproduce, invoke
-`builder-reproduce`, request the ontology assessment and score, and continue
-with `reproduce` in the same session. Builder scoring requires Python 3 and
-PyYAML (`python -m pip install pyyaml`).
+   The harness skill, [`agent-evaluation-profile`](skills/agent-evaluation-profile/SKILL.md), loads from `.claude/skills/` and `.agents/skills/`. Do not install the Reproduce skills at user level: a user-level copy reaches every arm, including `plain`.
 
-## What you provide
+2. Ask the agent to reproduce a task, for example:
 
-The skills do not contain benchmark-specific or hardware-specific commands. You supply them in three places.
+   ```text
+   Reproduce mlperf-language-bert with the three arms.
+   ```
 
-**Task prompt.** The prompt is the run contract. The agent does not reopen anything the prompt fixes. State, at least:
+   The task is a record in [`dataset/tasks/`](dataset/tasks/) or a link to a new benchmark repository. Answer the agent's questions. The first time, it asks for your deployment answers (where bundles and runs live, whether runs use this machine or Slurm, the model, and whether a human will answer during runs) and saves them in [`docs/local-preferences.md`](docs/local-preferences.md). For a new task, it asks you to choose targets, results, and a time limit.
+
+3. The agent sets up the task and prepares one workspace per arm (`plain`, `skill`, `builder-skill`). It starts the arms it can start itself. For any other arm, it gives you a path ending in `ws/`. Open exactly that `ws/` directory as the workspace of a new editor window, start a new chat there, and paste the text of `ws/prompt.md` unchanged. Do not open the run directory above `ws/` or any other parent: that session would see `launch.json` and other runs, and the evaluation counts it as a wrong launch.
+
+4. When a run ends, ask the agent in the repository chat about it. Each workspace holds `report.json` (the evaluator's values), `reproduce.sh` (the delivered script), `plan.md`, and the logs under `<target id>/out/`.
+
+To use the Reproduce skills in a workspace of your own instead, ask the agent here to install them there; it copies `skills/claude/<package>` to `.claude/skills/` or `skills/codex/<package>` to `.agents/skills/`. The prompt you then send in that workspace starts with `/reproduce` (or `/builder-reproduce`) and states the run contract in [What the reproducing agent reads](#what-the-reproducing-agent-reads).
+
+## What the reproducing agent reads
+
+The skills contain no benchmark-specific or hardware-specific commands. The agent in an arm's workspace takes them from up to three inputs. With the harness you write none of them: the harness renders the prompt from the dataset record and your answers, and Builder + Reproduce writes the card. You write a prompt only when you use the skills in a workspace of your own.
+
+**Task prompt (`prompt.md`).** The prompt is the run contract. The agent does not reopen anything the prompt fixes. It states:
 
 | Field | Meaning |
 | --- | --- |
@@ -67,16 +75,18 @@ The skills do not contain benchmark-specific or hardware-specific commands. You 
 
 The last field decides how the agent handles a blocked or unclear step. If a human will reply, the agent stops and asks. If none will, the agent records what it measured in `report.json`, states the failure with its evidence, and stops work on that target.
 
-**Hardware and scheduler (`docs/local-preferences.md`).** If the workspace has this file, the agent reads it. It holds the execution target (local or scheduler, plus account, partition, reservation, GPU string, and wall time), the environment strategy (documented route, modules first, container as fallback), and cache and download paths. If a value is missing, the agent asks once and writes the answer back. It never guesses an account, partition, reservation, or cache path. The file holds no task facts such as revision, target, or metric.
+**Benchmark card (`BENCHMARK_CARD.md`).** Builder + Reproduce writes this card before reproducing. It states the task, data, metrics, evaluator, and reference command, each with its source. Reproduce reads it, and reports a conflict between the card, the prompt, and the source with its evidence.
 
-**Benchmark card (`BENCHMARK_CARD.md`).** If the workspace has one, the agent reads it for the task, data, metrics, evaluator, and reference command, each with its source. Builder + Reproduce writes this file. A conflict between the card, the prompt, and the source is reported with its evidence.
+**Workspace preferences (`docs/local-preferences.md` inside the workspace).** Optional, and only for a workspace of your own: harness-prepared workspaces do not have one, because the prompt states the compute rule. If the file exists, Reproduce reads the execution target, environment strategy, and cache paths from it, asks once for any missing value, and writes the answer back. It never guesses an account, partition, reservation, or cache path. This file is separate from the harness's [`docs/local-preferences.md`](docs/local-preferences.md) in this repository.
 
 ## What a run produces
 
-Inside the workspace, the agent creates:
+After a run, the workspace holds:
 
 ```text
 ./                  workspace
+├── prompt.md       the task prompt (harness-prepared workspaces)
+├── tasks.json      per-target records the prompt points to (harness-prepared workspaces)
 ├── repo/           pinned source
 ├── reproduce.sh    written during preflight, run unchanged for the full run
 ├── <target id>/    multi-target tasks only; each holds that target's out/ directory
@@ -90,17 +100,9 @@ The agent measures through the benchmark-owned evaluator and does not score its 
 
 ## Scoring a benchmark with the builder
 
-`builder-reproduce` includes a rubric template for the six categories of the MLCommons Science Benchmarks Ontology (arXiv:2511.05614) and a scorer.
+`builder-reproduce` rates a benchmark's documentation against the six categories of the MLCommons Science Benchmarks Ontology (arXiv:2511.05614). It does not score a reproduction run. The `builder-skill` arm does this before reproducing: the agent fills the rubric from the benchmark's sources, writes `rubric.yaml`, runs the bundled scorer, and leaves `BENCHMARK_CARD.md` and `SCORE_REPORT.md` in the workspace. To rate a benchmark on its own, ask the agent, for example `Assess <benchmark repository> against the MLCommons ontology`.
 
-1. Copy `assets/rubric_template.yaml` beside the benchmark.
-2. Set `met` to `true` or `false` for every item, with the file and section that supports it in `evidence`. Leave `null` only for an item you have not answered.
-3. Run the scorer from the builder skill directory:
-
-```bash
-python scripts/score_benchmark.py path/to/rubric.yaml --out SCORE_REPORT.md
-```
-
-The scorer refuses to score a category that has unanswered items. A score of 4.5 or higher is the endorsement threshold the scorer reports against.
+`SCORE_REPORT.md` gives a score per category, with the evidence for each rubric item. A category with unanswered items is not scored, and 4.5 is the endorsement threshold the report compares against.
 
 ## Repository layout
 
@@ -110,6 +112,13 @@ skills/
   claude/builder-reproduce/    Builder + Reproduce package for Claude Code
   codex/reproduce/             Reproduce package for Codex
   codex/builder-reproduce/     Builder + Reproduce package for Codex
+  agent-evaluation-profile/    harness skill: set up a task and prepare each arm's workspace
   SOURCES.json                 package names, changes from the source skills, and file digests
+.claude/skills/, .agents/skills/   links that load the harness skill in this repository
+evaluation/                    task_prompt.py (render prompts), bundle.py (seal bundles), prepare.py (build arm workspaces)
+dataset/tasks/                 MLPerf Inference task records
+docs/local-preferences.md      deployment answers, filled by the agent on first use
+docs/dataset-schema.md         task record format
 docs/images/                   figures used in this README
+tests/                         harness tests (python -m pytest tests)
 ```

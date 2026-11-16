@@ -1,0 +1,55 @@
+{
+  "source_id": "mlperf-vision-medical-imaging-3d-unet",
+  "repo": {
+    "url": "https://github.com/mlcommons/inference.git",
+    "path": ".cache/sources/inference",
+    "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+    "directory": "vision/medical_imaging/3d-unet-kits19"
+  },
+  "domain": "medical imaging",
+  "language": "Python",
+  "support_level": "readme_only",
+  "policy": {
+    "compute": "slurm",
+    "platform": "one NVIDIA A100 80GB GPU per run.",
+    "inputs": {
+      "KITS19_RAW_DIR": {
+        "path": ".cache/3d-unet-kits19/kits19_raw_data/kits19/data",
+        "holds": "the raw imaging and segmentation of the cases in meta/inference_cases.json, except case_00400, the documented duplicate of case_00185"
+      },
+      "MODEL_DIR": {
+        "path": ".cache/3d-unet-kits19/model",
+        "holds": "3dunet_kits19_pytorch.ptc"
+      }
+    },
+    "forbidden": "the MLPerf Inference results repositories (mlcommons/inference_results_*), published MLPerf submissions, or the MLCommons results tables",
+    "wall_clock_cap": "1 hour"
+  },
+  "env_groups": [
+    {
+      "id": "3d-unet-env",
+      "tasks": [
+        "3d-unet"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "3d-unet",
+      "task_prompt": "Run `python3 run.py --backend=pytorch --scenario=Offline --accuracy` on the fp32 model in MODEL_DIR over the KiTS19 cases in meta/inference_cases.json, then accuracy_kits.py on its LoadGen accuracy log.",
+      "results": [
+        "mean",
+        "kidney",
+        "tumor"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "pytorch device: ": "the device the model's parameters are on"
+      }
+    }
+  ]
+}

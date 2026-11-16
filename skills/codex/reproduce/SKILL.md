@@ -86,8 +86,10 @@ Scope and replies:
 | Set up environment and data | Resolve dataset, checkpoint, cache path, split, structure, counts, and checksums before any expensive run. |
 | Preflight check and repair | Get the quickest safe evidence that each target runs end to end, cheapest first: startup, import, model or checkpoint load, one preprocessed input, a few samples through the evaluator, official quick mode. |
 | Preflight check and repair | Size each check to what the machine it runs on can hold. |
+| Preflight check and repair | A bounded run is evidence only for the workload it contains. Split the full run's input into its sub-workloads (datasets, languages, input kinds, stages) and include samples from every one in the bounded run that sizes the plan. A sub-workload left out is a cost the plan does not cover. |
 | Preflight check and repair | For a multi-target task, measure a few targets of different sizes, not only the first in the list. |
 | Full run and evaluation | Only bounded validation precedes the first full run. |
+| Full run and evaluation | Validate a change to throughput, batching, memory or output on a bounded run of the sub-workload it affects before submitting it as a full run. The full run tests the delivered script; it is not where a fix is tried. |
 | Full run and evaluation | The first full run is the delivered `reproduce.sh` under the clean-copy conditions the grader uses. Never run a full benchmark from a prepared environment and rebuild the script afterward. |
 | Full run and evaluation | Keep any wrapper the prompt requires around the benchmark command enabled in that run. |
 | Full run and evaluation | Split `reproduce.sh` into stages wherever the resource kind changes: environment build, input download and preprocessing (CPU-only), and the accelerator run. Each stage runs alone (`--stage <name>`) and hands its output to the next through files. |

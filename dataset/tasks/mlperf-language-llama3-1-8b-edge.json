@@ -1,0 +1,56 @@
+{
+  "source_id": "mlperf-language-llama3-1-8b-edge",
+  "repo": {
+    "url": "https://github.com/mlcommons/inference.git",
+    "path": ".cache/sources/inference",
+    "commit": "3fbc329939999c13d0a7b5e67fb2092287e06047",
+    "directory": "language/llama3.1-8b"
+  },
+  "domain": "text summarization",
+  "language": "Python",
+  "support_level": "readme_only",
+  "policy": {
+    "compute": "slurm",
+    "platform": "one NVIDIA A100 80GB GPU per run.",
+    "inputs": {
+      "DATASET_FILE": {
+        "path": ".cache/llama3.1-8b/dataset/sample_cnn_eval_5000.json"
+      },
+      "MODEL_DIR": {
+        "path": ".cache/llama3.1-8b/model",
+        "holds": "the Llama-3.1-8B-Instruct weights"
+      }
+    },
+    "forbidden": "the MLPerf Inference results repositories (mlcommons/inference_results_*), published MLPerf submissions, or the MLCommons results tables",
+    "wall_clock_cap": "1 hour"
+  },
+  "env_groups": [
+    {
+      "id": "llama3.1-8b-edge-env",
+      "tasks": [
+        "llama3.1-8b-edge"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "llama3.1-8b-edge",
+      "task_prompt": "Run `python -u main.py --lg-model-name llama3_1-8b-edge --scenario Offline --accuracy --vllm` (edge) at the README precision over the 5,000-sample CNN/DailyMail validation subset in DATASET_FILE, then evaluation.py on its LoadGen accuracy log.",
+      "results": [
+        "rouge1",
+        "rouge2",
+        "rougeL",
+        "rougeLsum",
+        "gen_len"
+      ],
+      "outputs": {
+        "mlperf_log_accuracy.json": "LoadGen's accuracy log",
+        "mlperf_log_detail.txt": "LoadGen's detail log",
+        "accuracy.txt": "the evaluator's stdout"
+      },
+      "log_lines": {
+        "torch cuda: ": "the value of `torch.cuda.is_available()` and the GPU names, written by the process that runs the model"
+      }
+    }
+  ]
+}

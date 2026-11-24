@@ -1,6 +1,6 @@
 # DeepVELA-Repro
 
-Agent skills for benchmark reproduction with Claude Code and Codex. A coding agent that follows these skills prepares, runs, repairs, and verifies a benchmark from its task prompt and repository documentation, and writes a measured report. The skills are written for researchers who reproduce a benchmark on their own hardware. A launch harness sets up MLPerf Inference tasks and prepares comparable runs with and without the skills. Scoring finished runs against references is not part of this repository.
+Agent skills for benchmark reproduction with Claude Code and Codex. A coding agent that follows these skills prepares, runs, repairs, and verifies a benchmark from its task prompt and repository documentation, and writes a measured report. The skills are written for researchers who reproduce a benchmark on their own hardware. A harness sets up MLPerf Inference tasks, starts comparable runs with and without the skills, and scores each finished run against a rubric and a reference.
 
 ![VELA Bench architecture: a knowledge layer (ontology), a reasoning layer (agentic framework), and an experience layer (evidence)](docs/images/vela-bench-architecture.png)
 
@@ -48,11 +48,11 @@ The Claude and Codex packages contain the same procedure. They differ only in ho
    Reproduce mlperf-language-bert with the three arms.
    ```
 
-   The task is a record in [`dataset/tasks/`](dataset/tasks/) or a link to a new benchmark repository. Answer the agent's questions. The first time, it asks for your deployment answers (where bundles and runs live, whether runs use this machine or Slurm, the model, and whether a human will answer during runs) and saves them in [`docs/local-preferences.md`](docs/local-preferences.md). For a new task, it asks you to choose targets, results, and a time limit.
+   The task is a record in [`dataset/tasks/`](dataset/tasks/) or a link to a new benchmark repository. Answer the agent's questions. The first time, it asks for your deployment answers (where bundles and runs live, whether runs use this machine or Slurm, the model, and whether a human will answer during runs) and saves them in [`docs/local-preferences.md`](docs/local-preferences.md). For a new task, it asks you to choose targets, the reference and tolerance for each result, and a time limit, and writes the rubrics from those answers.
 
 3. The agent sets up the task and prepares one workspace per arm (`plain`, `skill`, `builder-skill`). It starts the arms it can start itself. For any other arm, it gives you a path ending in `ws/`. Open exactly that `ws/` directory as the workspace of a new editor window, start a new chat there, and paste the text of `ws/prompt.md` unchanged. Do not open the run directory above `ws/` or any other parent: that session would see `launch.json` and other runs, and the evaluation counts it as a wrong launch.
 
-4. When a run ends, ask the agent in the repository chat about it. Each workspace holds `report.json` (the evaluator's values), `reproduce.sh` (the delivered script), `plan.md`, and the logs under `<target id>/out/`.
+4. When a run ends, tell the agent in the repository chat. It freezes the run, scores it against the task's rubric, and reports the result. Each workspace also holds `report.json` (the evaluator's values), `reproduce.sh` (the delivered script), `plan.md`, and the logs under `<target id>/out/`.
 
 To use the Reproduce skills in a workspace of your own instead, ask the agent here to install them there; it copies `skills/claude/<package>` to `.claude/skills/` or `skills/codex/<package>` to `.agents/skills/`. The prompt you then send in that workspace starts with `/reproduce` (or `/builder-reproduce`) and states the run contract in [What the reproducing agent reads](#what-the-reproducing-agent-reads).
 
@@ -94,13 +94,13 @@ After a run, the workspace holds:
 └── report.json     measured results in the format the prompt requires
 ```
 
-`reproduce.sh` accepts `--stage <name>` to run one stage alone (environment build, input download and preprocessing, accelerator run). With no `--stage`, it runs every stage under the prompt's compute rule, as a grader would. `reproduction.md` and `effect_ledger.jsonl` are written only when requested, to support resuming and auditing long runs.
+`reproduce.sh` accepts `--stage <name>` to run one stage alone (environment build, input download and preprocessing, accelerator run). With no `--stage`, it runs every stage under the prompt's compute rule. `reproduction.md` and `effect_ledger.jsonl` are written only when requested, to support resuming and auditing long runs.
 
 The agent measures through the benchmark-owned evaluator and does not score its own result.
 
 ## Scoring a benchmark with the builder
 
-`builder-reproduce` rates a benchmark's documentation against the six categories of the MLCommons Science Benchmarks Ontology (arXiv:2511.05614). It does not score a reproduction run. The `builder-skill` arm does this before reproducing: the agent fills the rubric from the benchmark's sources, writes `rubric.yaml`, runs the bundled scorer, and leaves `BENCHMARK_CARD.md` and `SCORE_REPORT.md` in the workspace. To rate a benchmark on its own, ask the agent, for example `Assess <benchmark repository> against the MLCommons ontology`.
+`builder-reproduce` rates a benchmark's documentation against the six categories of the MLCommons Science Benchmarks Ontology (arXiv:2511.05614). It does not score a reproduction run; the harness does that separately, against the task's rubric and reference. The `builder-skill` arm does this before reproducing: the agent fills the rubric from the benchmark's sources, writes `rubric.yaml`, runs the bundled scorer, and leaves `BENCHMARK_CARD.md` and `SCORE_REPORT.md` in the workspace. To rate a benchmark on its own, ask the agent, for example `Assess <benchmark repository> against the MLCommons ontology`.
 
 `SCORE_REPORT.md` gives a score per category, with the evidence for each rubric item. A category with unanswered items is not scored, and 4.5 is the endorsement threshold the report compares against.
 
@@ -113,9 +113,9 @@ skills/
   codex/reproduce/             Reproduce package for Codex
   codex/builder-reproduce/     Builder + Reproduce package for Codex
   agent-evaluation-profile/    harness skill: set up a task and prepare each arm's workspace
-  SOURCES.json                 package names, changes from the source skills, and file digests
+  SOURCES.json                 package names, the agent each targets, and file digests
 .claude/skills/, .agents/skills/   links that load the harness skill in this repository
-evaluation/                    task_prompt.py (render prompts), bundle.py (seal bundles), prepare.py (build arm workspaces)
+evaluation/                    task_prompt.py (render prompts), bundle.py (seal bundles), prepare.py (build arm workspaces), launch.py (start and freeze runs), scorer.py, checkers.py, transcript.py, schema.py (score a frozen run)
 dataset/tasks/                 MLPerf Inference task records
 docs/local-preferences.md      deployment answers, filled by the agent on first use
 docs/dataset-schema.md         task record format

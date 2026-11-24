@@ -5,136 +5,130 @@
   },
   "packages": [
     {
-      "harness": "claude",
+      "agent": "claude-code",
       "name": "reproduce",
-      "published_directory": "skills/claude/reproduce",
-      "changes": [
-        "Rename baseline-reproduce to reproduce and benchmark-builder to builder-reproduce in package names and active references.",
-        "Use the published configuration name in the entry-point title."
-      ],
+      "directory": "skills/claude/reproduce",
       "files": [
         {
           "path": "SKILL.md",
-          "published_sha256": "7be33c784418723c96be6b18d38609608157193aa5956b658aacacf70c37133b",
-          "unchanged": false
+          "sha256": "07fcfa928370b98b161b1223909c46757aa39ab2965a48262e9a38c01b73df24"
         }
       ]
     },
     {
-      "harness": "claude",
+      "agent": "claude-code",
       "name": "builder-reproduce",
-      "published_directory": "skills/claude/builder-reproduce",
-      "changes": [
-        "Rename baseline-reproduce to reproduce and benchmark-builder to builder-reproduce in package names and active references.",
-        "Use the published configuration name in the entry-point title.",
-        "Clarify the combined configuration description and required sibling Reproduce installation."
-      ],
+      "directory": "skills/claude/builder-reproduce",
+      "notes": "Hands off to `reproduce` through the Skill tool.",
       "files": [
         {
           "path": "SKILL.md",
-          "published_sha256": "644e0830b3f0fdcb06e9379981e3c7268d134e0ceca34b7e57a3671bcd2247d5",
-          "unchanged": false
+          "sha256": "644e0830b3f0fdcb06e9379981e3c7268d134e0ceca34b7e57a3671bcd2247d5"
         },
         {
           "path": "assets/benchmark_card_template.md",
-          "published_sha256": "5180e02bae3480e7dd07f3b3f1a6e8ead897cad4835e8d703233444f250771db",
-          "unchanged": false
+          "sha256": "5180e02bae3480e7dd07f3b3f1a6e8ead897cad4835e8d703233444f250771db"
         },
         {
           "path": "assets/rubric_template.yaml",
-          "published_sha256": "7ee33a16b2f7bd42990b4434c32cf7c62d341119ae33c0266850a75b47c4ca19",
-          "unchanged": true
+          "sha256": "7ee33a16b2f7bd42990b4434c32cf7c62d341119ae33c0266850a75b47c4ca19"
         },
         {
           "path": "assets/submission_report_template.md",
-          "published_sha256": "751f0bfa955659ce5634c8a6c7567965de8095eadad6e20776d92557f7215d92",
-          "unchanged": true
+          "sha256": "751f0bfa955659ce5634c8a6c7567965de8095eadad6e20776d92557f7215d92"
         },
         {
           "path": "references/ontology.md",
-          "published_sha256": "7c40a5c61bd1c204c579fc936c50587e97e49e3a1532a600e2457f70ad32f79a",
-          "unchanged": true
+          "sha256": "7c40a5c61bd1c204c579fc936c50587e97e49e3a1532a600e2457f70ad32f79a"
         },
         {
           "path": "scripts/metrics.py",
-          "published_sha256": "44513a209fd6ee7055dd79ce5989c0fe02653ec1774883fbf8ea3f64186dbf46",
-          "unchanged": true
+          "sha256": "44513a209fd6ee7055dd79ce5989c0fe02653ec1774883fbf8ea3f64186dbf46"
         },
         {
           "path": "scripts/score_benchmark.py",
-          "published_sha256": "4337dc7c644524d324f907d014e445e621df7cc05afc1549481b4bde3a4dd9a6",
-          "unchanged": true
+          "sha256": "4337dc7c644524d324f907d014e445e621df7cc05afc1549481b4bde3a4dd9a6"
         }
       ]
     },
     {
-      "harness": "codex",
+      "agent": "codex",
       "name": "reproduce",
-      "published_directory": "skills/codex/reproduce",
-      "changes": [
-        "Rename baseline-reproduce to reproduce and benchmark-builder to builder-reproduce in package names and active references.",
-        "Use the published configuration name in the entry-point title."
-      ],
+      "directory": "skills/codex/reproduce",
       "files": [
         {
           "path": "SKILL.md",
-          "published_sha256": "7be33c784418723c96be6b18d38609608157193aa5956b658aacacf70c37133b",
-          "unchanged": false
+          "sha256": "07fcfa928370b98b161b1223909c46757aa39ab2965a48262e9a38c01b73df24"
         }
       ]
     },
     {
-      "harness": "codex",
+      "agent": "codex",
       "name": "builder-reproduce",
-      "published_directory": "skills/codex/builder-reproduce",
-      "changes": [
-        "Rename baseline-reproduce to reproduce and benchmark-builder to builder-reproduce in package names and active references.",
-        "Use the published configuration name in the entry-point title.",
-        "Replace Claude-specific Skill-tool handoff with loading Reproduce in the same Codex session.",
-        "Clarify the combined configuration description and required sibling Reproduce installation."
-      ],
+      "directory": "skills/codex/builder-reproduce",
+      "notes": "Hands off to `reproduce` by loading it in the same session.",
       "files": [
         {
           "path": "SKILL.md",
-          "published_sha256": "3f0e2b10e72817e6cce9dc614b24210f32b0352dcf9d99e1e8527cfe2fbd98d0",
-          "unchanged": false
+          "sha256": "3f0e2b10e72817e6cce9dc614b24210f32b0352dcf9d99e1e8527cfe2fbd98d0"
         },
         {
           "path": "assets/benchmark_card_template.md",
-          "published_sha256": "5180e02bae3480e7dd07f3b3f1a6e8ead897cad4835e8d703233444f250771db",
-          "unchanged": false
+          "sha256": "5180e02bae3480e7dd07f3b3f1a6e8ead897cad4835e8d703233444f250771db"
         },
         {
           "path": "assets/rubric_template.yaml",
-          "published_sha256": "7ee33a16b2f7bd42990b4434c32cf7c62d341119ae33c0266850a75b47c4ca19",
-          "unchanged": true
+          "sha256": "7ee33a16b2f7bd42990b4434c32cf7c62d341119ae33c0266850a75b47c4ca19"
         },
         {
           "path": "assets/submission_report_template.md",
-          "published_sha256": "751f0bfa955659ce5634c8a6c7567965de8095eadad6e20776d92557f7215d92",
-          "unchanged": true
+          "sha256": "751f0bfa955659ce5634c8a6c7567965de8095eadad6e20776d92557f7215d92"
         },
         {
           "path": "references/ontology.md",
-          "published_sha256": "7c40a5c61bd1c204c579fc936c50587e97e49e3a1532a600e2457f70ad32f79a",
-          "unchanged": true
+          "sha256": "7c40a5c61bd1c204c579fc936c50587e97e49e3a1532a600e2457f70ad32f79a"
         },
         {
           "path": "scripts/metrics.py",
-          "published_sha256": "44513a209fd6ee7055dd79ce5989c0fe02653ec1774883fbf8ea3f64186dbf46",
-          "unchanged": true
+          "sha256": "44513a209fd6ee7055dd79ce5989c0fe02653ec1774883fbf8ea3f64186dbf46"
         },
         {
           "path": "scripts/score_benchmark.py",
-          "published_sha256": "4337dc7c644524d324f907d014e445e621df7cc05afc1549481b4bde3a4dd9a6",
-          "unchanged": true
+          "sha256": "4337dc7c644524d324f907d014e445e621df7cc05afc1549481b4bde3a4dd9a6"
+        }
+      ]
+    },
+    {
+      "agent": "any",
+      "name": "agent-evaluation-profile",
+      "directory": "skills/agent-evaluation-profile",
+      "notes": "Sets up a task, prepares and starts each arm, and scores a finished run. Loaded in this repository through .claude/skills and .agents/skills.",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "feb1acef8471eb9b7f7954ceba954813fd3725c1df2ba299e4067a346ece8593"
+        },
+        {
+          "path": "assets/bundle.yaml",
+          "sha256": "148b9a6b325f7b123f90badfbc1e1bd1c1181765b1e6b9f1d18cc5c82d876351"
+        },
+        {
+          "path": "assets/task_prompt.md",
+          "sha256": "a5058224269390604c89dbe5e646276f2d49cedc3113d9c2e2d043f063e3010e"
+        },
+        {
+          "path": "references/protocol.md",
+          "sha256": "7bce2f665c6e6257a45ce6692a58339aadc928d8cf09c2ad92313add0060a7db"
+        },
+        {
+          "path": "references/rubric-authoring.md",
+          "sha256": "bb4681282ee413c68c38955547c04992d4eba38902a2812a5e2602218041255b"
         }
       ]
     }
   ],
-  "version_notes": {
-    "claude": "Claude Code package snapshot.",
-    "codex": "Codex package snapshot.",
+  "notes": {
+    "packages": "One copy of each Reproduce package per coding agent. The copies differ only in how builder-reproduce hands off to reproduce.",
     "anonymity": "Source repository identifiers and source revision metadata are omitted from this distribution."
   }
 }

@@ -1,0 +1,12 @@
+# Skeleton bundle.yaml -- copy into <bundle_root>/<profile_id>/ and fill in at setup. The phases,
+# their labels, and their rubric templates are proposed from the task's own documentation and
+# confirmed by the user (SKILL.md, author mode step 2); this is the only place they are written.
+profile_id: <profile_id>
+profile_version: 1
+bundle_version: 1
+phases:
+  - id: <phase_id>
+    label: <phase label>
+    templates: [<rubric_id>, ...]
+cache_conditions: [<cache condition the task's inputs are provided under>]
+authorized_checker_dir: checkers

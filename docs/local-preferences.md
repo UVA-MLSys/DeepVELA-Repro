@@ -12,7 +12,7 @@ Contents: 1 Bundle root; 2 Runs root; 3 Compute and environment; 4 Study; 5 Shar
 
 ## 1. Bundle root
 
-Where task bundles (masked source, rendered prompt, manifest) live. It must be outside every directory a
+Where task bundles (rubrics, masked source, rendered prompt, manifest) and their withheld references live. It must be outside every directory a
 reproducing agent reads, so a run cannot see another run's bundle or the unmasked references.
 
 Recommendation: `../evaluation-profiles`.
@@ -93,8 +93,11 @@ Choices that hold for every task of one study ([protocol](../skills/agent-evalua
 
 - Arms to run: `plain` (no reproduction skill), `skill` (Reproduce), `builder-skill` (Builder + Reproduce).
   Recommendation: all three. Answer: unanswered
-- Agent harness and model, the same for every arm: Claude Code or Codex, and the model ID, which launch mode
-  passes as `--model`. Answer: unanswered
+- Agent harness and model, the same for every arm: Claude Code or Codex, and, for Codex, the model ID and
+  reasoning effort, which launch mode passes as `--model` and `--effort`. Answer: unanswered
+- Judge for claims a rubric checks by reading the transcript (`EVALUATION_JUDGE`): `codex` (the `codex` CLI must
+  be on `PATH`, or `CODEX_BIN` set) or `claude:<model ID>`. A judge from the same vendor as the agents under test
+  favors their output, so recommend the other vendor. Answer: unanswered
 - Help level: autonomous (`--autonomy`, no human replies) or interactive (the user answers the agent).
   Recommendation: autonomous for comparisons between arms. Answer: unanswered
 

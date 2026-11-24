@@ -86,15 +86,15 @@ Scope and replies:
 | Set up environment and data | Resolve dataset, checkpoint, cache path, split, structure, counts, and checksums before any expensive run. |
 | Preflight check and repair | Get the quickest safe evidence that each target runs end to end, cheapest first: startup, import, model or checkpoint load, one preprocessed input, a few samples through the evaluator, official quick mode. |
 | Preflight check and repair | Size each check to what the machine it runs on can hold. |
-| Preflight check and repair | A bounded run is evidence only for the workload it contains. Split the full run's input into its sub-workloads (datasets, languages, input kinds, stages) and include samples from every one in the bounded run that sizes the plan. A sub-workload left out is a cost the plan does not cover. |
+| Preflight check and repair | A bounded run is evidence only for the workload it contains. Split the full run's input into its sub-workloads (datasets, languages, input kinds, stages) and include samples from every one in the bounded run that sizes the plan. A sub-workload left out is a cost the plan does not cover. A bounded run reduces only the amount of input. Before launching it, find every file and constant the code checks the input against (manifests, case lists, counts, checksums) and reduce each to the same subset; never skip a check. |
 | Preflight check and repair | For a multi-target task, measure a few targets of different sizes, not only the first in the list. |
 | Full run and evaluation | Only bounded validation precedes the first full run. |
 | Full run and evaluation | Validate a change to throughput, batching, memory or output on a bounded run of the sub-workload it affects before submitting it as a full run. The full run tests the delivered script; it is not where a fix is tried. |
-| Full run and evaluation | The first full run is the delivered `reproduce.sh` under the clean-copy conditions the grader uses. Never run a full benchmark from a prepared environment and rebuild the script afterward. |
+| Full run and evaluation | The first full run is the delivered `reproduce.sh` under the task prompt's Deliverable conditions. Never run a full benchmark from a prepared environment and rebuild the script afterward. Start it from nothing built with `./reproduce.sh --from <first stage>`, which clears the script's own outputs, or in a new directory holding only `reproduce.sh` beside a fresh copy of the repository; never by deleting outputs by hand. |
 | Full run and evaluation | Keep any wrapper the prompt requires around the benchmark command enabled in that run. |
-| Full run and evaluation | Split `reproduce.sh` into stages wherever the resource kind changes: environment build, input download and preprocessing (CPU-only), and the accelerator run. Each stage runs alone (`--stage <name>`) and hands its output to the next through files. |
+| Full run and evaluation | Split `reproduce.sh` into stages wherever the resource kind changes: environment build, input download and preprocessing (CPU-only), and the accelerator run. Each stage runs alone (`--stage <name>`) and hands its output to the next through files. `--from <name>` runs that stage and every later one (Batches over targets, step 6). |
 | Full run and evaluation | With no `--stage`, the script runs every stage under the prompt's compute rule. It never requests an allocation its caller already holds, and it submits a job only where the compute rule assigns submission to the script. Each job it submits requests only the resource its stage uses and starts after the jobs whose output it reads have finished. |
-| Full run and evaluation | Preflight runs stages alone. The full run is the no-`--stage` path, as the grader runs it. |
+| Full run and evaluation | Preflight runs stages alone. The full run is the no-`--stage` path under the task prompt's Deliverable conditions. |
 | Report measured results | Run the benchmark-owned evaluator over the scope fixed in Read contract and Inspect source, and write the requested report exactly. |
 | Report measured results | Do not self-score. |
 
@@ -141,7 +141,8 @@ A multi-target task runs as a pipeline, not as one stage at a time across all ta
 3. CPU stages (downloads, builds, repairs) run beside it on the cores the accelerator stage leaves free. Under contention, lower their parallelism; do not stop them.
 4. A repaired target goes back into the queue; the queue keeps moving while repairs happen.
 5. A step succeeded when its stage wrote a success marker file beside its output after every command of the stage exited 0 (for the run stage, its evaluator too). A stage shared by several targets under the reuse rule has one marker, beside the shared output. The driver skips each step whose marker exists, so restarting it, or a new session, never repeats finished work and needs no chat history.
-6. A repair deletes the markers of the stage it changes and of every later stage that reads its output, so the changed stage and everything after it run again.
+6. Any rerun of a finished stage, a repair or not, uses `./reproduce.sh --from <stage>`. The script then runs that stage and every later stage that reads its output, and removes their markers and the outputs they rewrite itself. Markers and outputs are never deleted by hand. This holds for bounded runs too: a preflight writes only where `reproduce.sh` puts its output and is redone with `--from`, never by deleting its directory.
+7. Every stage runs correctly over its own earlier output: it reuses or recreates what it built, such as an environment, instead of failing because it exists.
 
 ## Preferences
 

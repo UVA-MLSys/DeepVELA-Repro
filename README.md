@@ -13,6 +13,7 @@ The architecture has three layers. The knowledge layer holds the benchmark ontol
 - [What the reproducing agent reads](#what-the-reproducing-agent-reads)
 - [What a run produces](#what-a-run-produces)
 - [Scoring a benchmark with the builder](#scoring-a-benchmark-with-the-builder)
+- [C0–C6 masking conditions](#c0c6-masking-conditions)
 - [Repository layout](#repository-layout)
 
 ## Configurations
@@ -58,6 +59,9 @@ To use the Reproduce skills in a workspace of your own instead, ask the agent he
 
 ## What the reproducing agent reads
 
+<details>
+<summary>Show details</summary>
+
 The skills contain no benchmark-specific or hardware-specific commands. The agent in an arm's workspace takes them from up to three inputs. With the harness you write none of them: the harness renders the prompt from the dataset record and your answers, and Builder + Reproduce writes the card. You write a prompt only when you use the skills in a workspace of your own.
 
 **Task prompt (`prompt.md`).** The prompt is the run contract. The agent does not reopen anything the prompt fixes. It states:
@@ -79,7 +83,12 @@ The last field decides how the agent handles a blocked or unclear step. If a hum
 
 **Workspace preferences (`docs/local-preferences.md` inside the workspace).** Optional, and only for a workspace of your own: harness-prepared workspaces do not have one, because the prompt states the compute rule. If the file exists, Reproduce reads the execution target, environment strategy, and cache paths from it, asks once for any missing value, and writes the answer back. It never guesses an account, partition, reservation, or cache path. This file is separate from the harness's [`docs/local-preferences.md`](docs/local-preferences.md) in this repository.
 
+</details>
+
 ## What a run produces
+
+<details>
+<summary>Show details</summary>
 
 After a run, the workspace holds:
 
@@ -98,13 +107,39 @@ After a run, the workspace holds:
 
 The agent measures through the benchmark-owned evaluator and does not score its own result.
 
+</details>
+
 ## Scoring a benchmark with the builder
+
+<details>
+<summary>Show details</summary>
 
 `builder-reproduce` rates a benchmark's documentation against the six categories of the MLCommons Science Benchmarks Ontology (arXiv:2511.05614). It does not score a reproduction run; the harness does that separately, against the task's rubric and reference. The `builder-skill` arm does this before reproducing: the agent fills the rubric from the benchmark's sources, writes `rubric.yaml`, runs the bundled scorer, and leaves `BENCHMARK_CARD.md` and `SCORE_REPORT.md` in the workspace. To rate a benchmark on its own, ask the agent, for example `Assess <benchmark repository> against the MLCommons ontology`.
 
 `SCORE_REPORT.md` gives a score per category, with the evidence for each rubric item. A category with unanswered items is not scored, and 4.5 is the endorsement threshold the report compares against.
 
+</details>
+
+## C0–C6 masking conditions
+
+The controlled masking studies run one reproduction target under seven source conditions: Chronos-2 on GIFT-Eval (time-series forecasting) and 3D U-Net on MLPerf Inference (medical imaging). Each condition starts from the full reference source (C0), removes the information of one category of the MLCommons reference-quality rubric, and leaves the reproduction target, inputs, and evaluator unchanged. The score is the overall MLCommons rubric score of the masked reference, out of five; a lower score marks a less complete reference. The 3D U-Net task record is [`dataset/tasks/mlperf-c0-c6/3d-unet-kits19.json`](dataset/tasks/mlperf-c0-c6/3d-unet-kits19.json).
+
+The conditions test one hypothesis: an agent can recover information that belongs to the implementation contract, $I$, from the remaining sources and the environment, but cannot recover a value that belongs to the scientific contract, $S$, without inventing it. The last column marks the conditions that remove a value in $S$.
+
+| Condition | Rubric category | GIFT-Eval (Chronos-2): removed information | Score | MLPerf (3D U-Net): removed information | Score | Value in $S$ |
+| --- | --- | --- | --- | --- | --- | --- |
+| C0 | None | None | 4.5 | None | 4.4 | No |
+| C1 | Software environment | Setup and installation instructions | 4.3 | Container specification with version pins; build and setup recipes | 3.8 | No |
+| C2 | Problem specification | Choice of native multivariate or flattened univariate inputs | 4.3 | Target voxel spacing for resampling every scan; published scores | 3.9 | Yes |
+| C3 | Dataset | Evaluated dataset revision and source lineage | 4.3 | KiTS19 download links and instructions | 4.0 | No |
+| C4 | Performance metrics | Quantile grid for the approximate CRPS (continuous ranked probability score) | 4.3 | How per-scan Dice scores, including failed scans, combine into the reported score; published scores | 4.0 | Yes |
+| C5 | Reference solution | Published evidence of secondary-metric evaluation | 4.3 | Inference harness that runs the model under LoadGen | 3.9 | No |
+| C6 | Documentation | Benchmark motivation and rationale | 4.3 | Overview, background, and motivation | 3.7 | No |
+
 ## Repository layout
+
+<details>
+<summary>Show details</summary>
 
 ```text
 skills/
@@ -122,3 +157,5 @@ docs/dataset-schema.md         task record format
 docs/images/                   figures used in this README
 tests/                         harness tests (python -m pytest tests)
 ```
+
+</details>
